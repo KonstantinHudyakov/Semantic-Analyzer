@@ -2,7 +2,9 @@ package me.khudyakov.semanticanalyzer;
 
 import me.khudyakov.semanticanalyzer.program.ProgramCode;
 import me.khudyakov.semanticanalyzer.program.SemanticTree;
+import me.khudyakov.semanticanalyzer.service.CodeParser;
 import me.khudyakov.semanticanalyzer.service.CodeParserImpl;
+import me.khudyakov.semanticanalyzer.service.StaticAnalyzer;
 import me.khudyakov.semanticanalyzer.service.StaticAnalyzerImpl;
 import me.khudyakov.semanticanalyzer.util.ExpressionConverterException;
 import me.khudyakov.semanticanalyzer.util.StaticAnalyzerException;
@@ -14,8 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class StaticAnalyzerTest {
 
-    private final StaticAnalyzerImpl staticAnalyzer = new StaticAnalyzerImpl();
-    private final CodeParserImpl codeParser = new CodeParserImpl();
+    private final StaticAnalyzer staticAnalyzer = new StaticAnalyzerImpl();
+    private final CodeParser codeParser = new CodeParserImpl();
 
     @Test
     void analyze() throws StaticAnalyzerException, ExpressionConverterException, ParseException {

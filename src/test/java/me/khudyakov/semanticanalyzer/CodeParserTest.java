@@ -1,6 +1,7 @@
 package me.khudyakov.semanticanalyzer;
 
 import me.khudyakov.semanticanalyzer.program.ProgramCode;
+import me.khudyakov.semanticanalyzer.service.CodeParser;
 import me.khudyakov.semanticanalyzer.service.CodeParserImpl;
 import org.junit.jupiter.api.Test;
 
@@ -10,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CodeParserTest {
 
-    private final CodeParserImpl codeParser = new CodeParserImpl();
+    private final CodeParser codeParser = new CodeParserImpl();
 
     @Test
     void parse() throws ParseException {

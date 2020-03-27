@@ -1,10 +1,10 @@
 package me.khudyakov.semanticanalyzer;
 
-import java.text.ParseException;
+import me.khudyakov.semanticanalyzer.editor.EditorGUI;
 
 public class Application {
 
-    public static void main(String[] args) throws ParseException {
-
+    public static void main(String[] args) {
+        EditorGUI editorGUI = new EditorGUI();
     }
 }

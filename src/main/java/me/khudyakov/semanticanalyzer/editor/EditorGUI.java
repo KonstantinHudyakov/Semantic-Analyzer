@@ -103,6 +103,7 @@ public class EditorGUI extends JFrame implements ActionListener {
 
         Document document = codeArea.getDocument();
         document.addDocumentListener(new CodeChangedListener(this));
+        document.addDocumentListener(new CodeAreaEditingListener());
 
 
         return codeArea;

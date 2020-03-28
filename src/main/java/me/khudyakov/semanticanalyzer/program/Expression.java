@@ -4,6 +4,7 @@ import me.khudyakov.semanticanalyzer.components.Lexeme;
 import me.khudyakov.semanticanalyzer.components.atoms.Atom;
 import me.khudyakov.semanticanalyzer.components.atoms.Constant;
 import me.khudyakov.semanticanalyzer.components.operations.*;
+import me.khudyakov.semanticanalyzer.util.ExpressionExecutionException;
 
 import java.util.Iterator;
 import java.util.List;
@@ -14,22 +15,26 @@ public class Expression {
 
     private List<Lexeme> expr;
 
-    public Constant execute() {
-        Stack<Integer> st = new Stack<>();
-        for (int i = 0; i < expr.size(); i++) {
-            Lexeme cur = expr.get(i);
-            if (cur instanceof Atom) {
-                st.push(((Atom) cur).getValue());
-            } else if (cur instanceof UnaryOperation) {
-                int a = st.pop();
-                st.push(((UnaryOperation) cur).apply(a));
-            } else if (cur instanceof BinaryOperation){
-                int a = st.pop();
-                int b = st.pop();
-                st.push(((BinaryOperation)cur).applyAsInt(b, a));
+    public Constant execute() throws ExpressionExecutionException {
+        try {
+            Stack<Integer> st = new Stack<>();
+            for (int i = 0; i < expr.size(); i++) {
+                Lexeme cur = expr.get(i);
+                if (cur instanceof Atom) {
+                    st.push(((Atom) cur).getValue());
+                } else if (cur instanceof UnaryOperation) {
+                    int a = st.pop();
+                    st.push(((UnaryOperation) cur).apply(a));
+                } else if (cur instanceof BinaryOperation) {
+                    int a = st.pop();
+                    int b = st.pop();
+                    st.push(((BinaryOperation) cur).applyAsInt(b, a));
+                }
             }
+            return new Constant(st.peek());
+        } catch (Exception ex) {
+            throw new ExpressionExecutionException(ex);
         }
-        return new Constant(st.peek());
     }
 
     public Expression(List<Lexeme> expr) {

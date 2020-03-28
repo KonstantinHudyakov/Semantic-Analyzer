@@ -13,21 +13,25 @@ import me.khudyakov.semanticanalyzer.program.Expression;
 import me.khudyakov.semanticanalyzer.program.ProgramCode;
 import me.khudyakov.semanticanalyzer.program.SemanticTree;
 import me.khudyakov.semanticanalyzer.util.ExpressionConverterException;
+import me.khudyakov.semanticanalyzer.util.ExpressionExecutionException;
 import me.khudyakov.semanticanalyzer.util.StaticAnalyzerException;
+
+import java.util.Collections;
 
 public class StaticAnalyzerImpl implements StaticAnalyzer {
 
     private final ExpressionConverterImpl expressionConverter = new ExpressionConverterImpl();
 
-    public SemanticTree analyze(ProgramCode programCode) throws StaticAnalyzerException, ExpressionConverterException {
+    public SemanticTree analyze(ProgramCode programCode) throws StaticAnalyzerException, ExpressionConverterException, ExpressionExecutionException {
         StatementListNode statementListNode = statementList(programCode, 0);
-        if(statementListNode.getEndInd() + 1 != programCode.size()) {
+        if (statementListNode.getEndInd() + 1 != programCode.size()) {
             throw new StaticAnalyzerException("Преждевременный конец программы, ind = " + statementListNode.getEndInd());
         }
         return new SemanticTree(statementListNode);
     }
 
-    private StatementListNode statementList(ProgramCode programCode, int ind) throws StaticAnalyzerException, ExpressionConverterException {
+    private StatementListNode statementList(ProgramCode programCode,
+                                            int ind) throws StaticAnalyzerException, ExpressionConverterException, ExpressionExecutionException {
         StatementListNode nodeList = new StatementListNode();
         nodeList.setStartInd(ind);
         while (ind < programCode.size()) {
@@ -39,7 +43,8 @@ public class StaticAnalyzerImpl implements StaticAnalyzer {
         return nodeList;
     }
 
-    private TreeNode statement(ProgramCode programCode, int ind) throws StaticAnalyzerException, ExpressionConverterException {
+    private TreeNode statement(ProgramCode programCode,
+                               int ind) throws StaticAnalyzerException, ExpressionConverterException, ExpressionExecutionException {
         Lexeme cur = programCode.get(ind);
         TreeNode node = null;
         if (cur instanceof IfStatement) {
@@ -54,11 +59,13 @@ public class StaticAnalyzerImpl implements StaticAnalyzer {
         return node;
     }
 
-    private ConditionNode ifStatement(ProgramCode programCode, int ind) throws StaticAnalyzerException, ExpressionConverterException {
+    private ConditionNode ifStatement(ProgramCode programCode,
+                                      int ind) throws StaticAnalyzerException, ExpressionConverterException, ExpressionExecutionException {
         int n = programCode.size();
         int beginInd = ind;
         if (ind + 1 < n && programCode.get(ind + 1) instanceof OpenParenthesis) {
             ind++;
+            Expression expression = null;
             if (ind + 1 < n && (programCode.get(ind + 1) instanceof Atom || programCode.get(ind + 1) instanceof Operation
                     || programCode.get(ind + 1) instanceof OpenParenthesis)) {
                 ind++;
@@ -76,21 +83,27 @@ public class StaticAnalyzerImpl implements StaticAnalyzer {
                 if (ind >= n) {
                     throw new StaticAnalyzerException("Ошибка при чтении ifStatement, ind = " + ind);
                 }
-                Expression expression = new Expression(programCode.subList(beginExpr, ind - 1));
-                if (!(programCode.get(ind) instanceof CloseParenthesis
-                        || programCode.get(ind) instanceof CloseBrace
-                        || programCode.get(ind) instanceof Assign
-                        || programCode.get(ind) instanceof Semicolon)) {
-                    TreeNode statement = statement(programCode, ind);
-                    expressionConverter.convertToPostfix(expression);
-                    return new ConditionNode(expression, statement, beginInd, statement.getEndInd());
-                }
+                expression = new Expression(programCode.subList(beginExpr, ind - 1));
+                expressionConverter.convertToPostfix(expression);
+            } else if (ind + 1 < n && programCode.get(ind + 1) instanceof CloseParenthesis) {
+                expression = new Expression(Collections.emptyList());
+                ind += 2;
+            } else {
+                throw new StaticAnalyzerException("Ошибка при чтении ifStatement, ind = " + ind);
+            }
+            if (!(programCode.get(ind) instanceof CloseParenthesis
+                    || programCode.get(ind) instanceof CloseBrace
+                    || programCode.get(ind) instanceof Assign
+                    || programCode.get(ind) instanceof Semicolon)) {
+                TreeNode statement = statement(programCode, ind);
+                return new ConditionNode(expression, statement, beginInd, statement.getEndInd());
             }
         }
         throw new StaticAnalyzerException("Ошибка при чтении ifStatement, ind = " + ind);
     }
 
-    private AssignNode assignStatement(ProgramCode programCode, int ind) throws StaticAnalyzerException, ExpressionConverterException {
+    private AssignNode assignStatement(ProgramCode programCode,
+                                       int ind) throws StaticAnalyzerException, ExpressionConverterException, ExpressionExecutionException {
         int n = programCode.size();
         int beginInd = ind;
         // Проверка на соответствие грамматике: Variable = Expression
@@ -113,7 +126,8 @@ public class StaticAnalyzerImpl implements StaticAnalyzer {
         return new AssignNode(expression, var, beginInd, ind);
     }
 
-    private BlockStatementsNode blockStatement(ProgramCode programCode, int ind) throws StaticAnalyzerException, ExpressionConverterException {
+    private BlockStatementsNode blockStatement(ProgramCode programCode,
+                                               int ind) throws StaticAnalyzerException, ExpressionConverterException, ExpressionExecutionException {
         int n = programCode.size();
         BlockStatementsNode nodeList = new BlockStatementsNode();
         nodeList.setStartInd(ind);
@@ -123,7 +137,7 @@ public class StaticAnalyzerImpl implements StaticAnalyzer {
             nodeList.add(node);
             ind = node.getEndInd() + 1;
         }
-        if(ind >= n) {
+        if (ind >= n) {
             throw new StaticAnalyzerException("Преждевременный конец программы, ind = " + ind);
         }
         nodeList.setEndInd(ind);
@@ -142,7 +156,8 @@ public class StaticAnalyzerImpl implements StaticAnalyzer {
 //        throw new StaticAnalyzerException("Ошибка при чтении blockStatement, ind = " + ind);
     }
 
-    private ExpressionNode expressionStatement(ProgramCode programCode, int ind) throws ExpressionConverterException {
+    private ExpressionNode expressionStatement(ProgramCode programCode,
+                                               int ind) throws ExpressionConverterException, ExpressionExecutionException {
         int beginInd = ind;
         while (ind < programCode.size() && !(programCode.get(ind) instanceof Semicolon)) {
             ind++;

@@ -1,5 +1,7 @@
 package me.khudyakov.semanticanalyzer.program;
 
+import me.khudyakov.semanticanalyzer.util.ExpressionExecutionException;
+
 public class Program {
 
     private ProgramCode programCode;
@@ -8,8 +10,8 @@ public class Program {
     public Program() {
     }
 
-    public void execute() {
-        semanticTree.getRoot().execute();
+    public void execute() throws ExpressionExecutionException {
+        semanticTree.getRoot().executeSubtree();
     }
 
     public Program(ProgramCode programCode, SemanticTree semanticTree) {

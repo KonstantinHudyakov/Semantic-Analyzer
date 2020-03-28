@@ -1,5 +1,7 @@
 package me.khudyakov.semanticanalyzer.components.semantictree;
 
+import me.khudyakov.semanticanalyzer.util.ExpressionExecutionException;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -11,8 +13,10 @@ public class StatementListNode extends TreeNode {
     private List<TreeNode> statements = new ArrayList<>();
 
     @Override
-    public void execute() {
-        statements.forEach(TreeNode::execute);
+    public void executeSubtree() throws ExpressionExecutionException {
+        for (TreeNode statement : statements) {
+            statement.executeSubtree();
+        }
     }
 
     public List<TreeNode> getStatements() {

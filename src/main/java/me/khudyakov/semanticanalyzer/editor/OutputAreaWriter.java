@@ -1,6 +1,8 @@
 package me.khudyakov.semanticanalyzer.editor;
 
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 
 public class OutputAreaWriter {
 
@@ -32,5 +34,18 @@ public class OutputAreaWriter {
         if(outputArea != null) {
             outputArea.setText("");
         }
+    }
+
+    public static String getText() {
+        String text = "";
+        if(outputArea != null) {
+            Document document = outputArea.getDocument();
+            try {
+                text = document.getText(0, document.getLength());
+            } catch (BadLocationException e) {
+                // never happens
+            }
+        }
+        return text;
     }
 }

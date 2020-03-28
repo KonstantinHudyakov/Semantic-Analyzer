@@ -8,6 +8,8 @@ import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 public class EditorGUI extends JFrame implements ActionListener {
 
@@ -100,7 +102,7 @@ public class EditorGUI extends JFrame implements ActionListener {
         codeAreaScroll.setPreferredSize(new Dimension(800, 350));
 
         Document document = codeArea.getDocument();
-        document.addDocumentListener(new CodeChangedListener(document));
+        document.addDocumentListener(new CodeChangedListener(this));
 
 
         return codeArea;
@@ -119,6 +121,43 @@ public class EditorGUI extends JFrame implements ActionListener {
         outputAreaScroll.setPreferredSize(new Dimension(800, 150));
 
         return outputArea;
+    }
+
+    public void showPopupLabel(String text, int x, int y) {
+        JLabel popupLabel = new JLabel(text);
+
+        popupLabel.setPreferredSize(new Dimension(200, 25));
+        PopupFactory popupFactory = PopupFactory.getSharedInstance();
+        Popup popup = popupFactory.getPopup(this, popupLabel, x, y);
+
+        popupLabel.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                popup.hide();
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                // do nothing
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                // do nothing
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                // do nothing
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                // do nothing
+            }
+        });
+
+        popup.show();
     }
 
     private JMenuBar createMenuBar() {

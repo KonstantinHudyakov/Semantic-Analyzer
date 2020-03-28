@@ -36,6 +36,9 @@ public class RunMenuListener implements MenuListener {
             program.setSemanticTree(semanticTree);
 
             program.execute();
+
+
+
         } catch (Exception ex) {
             OutputAreaWriter.setContent("Errors in the code!");
         }

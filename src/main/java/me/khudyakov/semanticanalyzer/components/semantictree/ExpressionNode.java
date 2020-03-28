@@ -3,6 +3,7 @@ package me.khudyakov.semanticanalyzer.components.semantictree;
 import me.khudyakov.semanticanalyzer.components.atoms.Constant;
 import me.khudyakov.semanticanalyzer.editor.OutputAreaWriter;
 import me.khudyakov.semanticanalyzer.program.Expression;
+import me.khudyakov.semanticanalyzer.util.ExpressionExecutionException;
 
 public class ExpressionNode extends StatementNode {
 
@@ -15,7 +16,7 @@ public class ExpressionNode extends StatementNode {
     }
 
     @Override
-    public void execute() {
+    public void executeSubtree() throws ExpressionExecutionException {
         Constant res = expression.execute();
         OutputAreaWriter.println(res.toString());
     }

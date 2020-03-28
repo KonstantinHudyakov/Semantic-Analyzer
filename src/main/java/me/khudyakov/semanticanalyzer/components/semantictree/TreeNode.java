@@ -1,5 +1,7 @@
 package me.khudyakov.semanticanalyzer.components.semantictree;
 
+import me.khudyakov.semanticanalyzer.util.ExpressionExecutionException;
+
 public abstract class TreeNode {
 
     private int startInd;
@@ -13,7 +15,7 @@ public abstract class TreeNode {
         this.endInd = endInd;
     }
 
-    public abstract void execute();
+    public abstract void executeSubtree() throws ExpressionExecutionException;
 
     public int getStartInd() {
         return startInd;

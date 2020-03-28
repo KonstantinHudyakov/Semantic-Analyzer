@@ -7,6 +7,7 @@ import me.khudyakov.semanticanalyzer.service.CodeParserImpl;
 import me.khudyakov.semanticanalyzer.service.StaticAnalyzer;
 import me.khudyakov.semanticanalyzer.service.StaticAnalyzerImpl;
 import me.khudyakov.semanticanalyzer.util.ExpressionConverterException;
+import me.khudyakov.semanticanalyzer.util.ExpressionExecutionException;
 import me.khudyakov.semanticanalyzer.util.StaticAnalyzerException;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +21,7 @@ class StaticAnalyzerTest {
     private final CodeParser codeParser = new CodeParserImpl();
 
     @Test
-    void analyze() throws StaticAnalyzerException, ExpressionConverterException, ParseException {
+    void analyze() throws StaticAnalyzerException, ExpressionConverterException, ParseException, ExpressionExecutionException {
         String inputProgram = "@x  = 10;\n" +
                 "@second = 20;\n" +
                 "if (second - 19) {\n" +
@@ -35,7 +36,7 @@ class StaticAnalyzerTest {
     }
 
     @Test
-    void analyze2() throws StaticAnalyzerException, ExpressionConverterException, ParseException {
+    void analyze2() throws StaticAnalyzerException, ExpressionConverterException, ParseException, ExpressionExecutionException {
         String inputProgram = "{ @ x= 2;\n" +
                 " @second = -3 ; }\n" +
                 "if (second - 19) {\n" +

@@ -1,6 +1,7 @@
 package me.khudyakov.semanticanalyzer.components.semantictree;
 
 import me.khudyakov.semanticanalyzer.program.Expression;
+import me.khudyakov.semanticanalyzer.util.ExpressionExecutionException;
 
 public class ConditionNode extends StatementNode {
 
@@ -17,13 +18,13 @@ public class ConditionNode extends StatementNode {
     }
 
     @Override
-    public void execute() {
+    public void executeSubtree() throws ExpressionExecutionException {
         if(checkCondition()) {
-            body.execute();
+            body.executeSubtree();
         }
     }
 
-    private boolean checkCondition() {
+    private boolean checkCondition() throws ExpressionExecutionException {
         return expression.execute().getValue() != 0;
     }
 

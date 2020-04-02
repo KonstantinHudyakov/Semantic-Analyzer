@@ -1,1 +1,1 @@
-java -jar target/SemanticAnalyzer-1.0-SNAPSHOT.jar
+java -jar target/StaticAnalyzer-1.0-SNAPSHOT.jar

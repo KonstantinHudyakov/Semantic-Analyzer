@@ -1,0 +1,1 @@
+java -jar target/SemanticAnalyzer-1.0-SNAPSHOT.jar

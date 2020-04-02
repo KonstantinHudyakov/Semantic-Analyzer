@@ -2,7 +2,7 @@ package me.khudyakov.semanticanalyzer.components.atoms;
 
 public class Constant extends Atom {
 
-    public Constant(int value) {
+    public Constant(Integer value) {
         this.value = value;
     }
 

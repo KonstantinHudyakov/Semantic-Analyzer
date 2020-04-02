@@ -1,8 +1,8 @@
 package me.khudyakov.semanticanalyzer.service;
 
-import me.khudyakov.semanticanalyzer.components.semantictree.BlockStatementsNode;
-import me.khudyakov.semanticanalyzer.components.semantictree.ConditionNode;
-import me.khudyakov.semanticanalyzer.components.semantictree.TreeNode;
+import me.khudyakov.semanticanalyzer.components.syntaxtree.BlockStatementsNode;
+import me.khudyakov.semanticanalyzer.components.syntaxtree.ConditionNode;
+import me.khudyakov.semanticanalyzer.components.syntaxtree.TreeNode;
 import me.khudyakov.semanticanalyzer.program.Program;
 
 import java.util.List;
@@ -11,8 +11,8 @@ public class FramingIfFeatureFinder implements FeatureFinder {
 
     @Override
     public boolean featureFound(Program oldVersion, Program curVersion) {
-        List<TreeNode> oldDfsOrder = oldVersion.getSemanticTree().getDfsOrder();
-        List<TreeNode> curDfsOrder = curVersion.getSemanticTree().getDfsOrder();
+        List<TreeNode> oldDfsOrder = oldVersion.getSyntaxTree().getDfsOrder();
+        List<TreeNode> curDfsOrder = curVersion.getSyntaxTree().getDfsOrder();
 
         int size = oldDfsOrder.size();
         boolean found = false;

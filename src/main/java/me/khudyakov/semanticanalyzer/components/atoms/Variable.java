@@ -7,7 +7,7 @@ public class Variable extends Atom {
         this.name = name;
     }
 
-    public Variable(String name, int value) {
+    public Variable(String name, Integer value) {
         this.name = name;
         this.value = value;
     }

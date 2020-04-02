@@ -3,13 +3,13 @@ package me.khudyakov.semanticanalyzer.components.atoms;
 import me.khudyakov.semanticanalyzer.components.Lexeme;
 
 public abstract class Atom extends Lexeme {
-    protected int value;
+    protected Integer value;
 
-    public int getValue() {
+    public Integer getValue() {
         return value;
     }
 
-    public void setValue(int value) {
+    public void setValue(Integer value) {
         this.value = value;
     }
 }

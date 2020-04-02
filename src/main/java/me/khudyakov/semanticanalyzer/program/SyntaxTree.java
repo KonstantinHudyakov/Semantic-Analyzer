@@ -1,19 +1,19 @@
 package me.khudyakov.semanticanalyzer.program;
 
-import me.khudyakov.semanticanalyzer.components.semantictree.ConditionNode;
-import me.khudyakov.semanticanalyzer.components.semantictree.StatementListNode;
-import me.khudyakov.semanticanalyzer.components.semantictree.TreeNode;
+import me.khudyakov.semanticanalyzer.components.syntaxtree.ConditionNode;
+import me.khudyakov.semanticanalyzer.components.syntaxtree.StatementListNode;
+import me.khudyakov.semanticanalyzer.components.syntaxtree.TreeNode;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SemanticTree {
+public class SyntaxTree {
 
     private StatementListNode root;
 
     private List<TreeNode> dfsOrder;
 
-    public SemanticTree(StatementListNode root) {
+    public SyntaxTree(StatementListNode root) {
         this.root = root;
         dfsOrder = new ArrayList<>();
         traverseTree(root);

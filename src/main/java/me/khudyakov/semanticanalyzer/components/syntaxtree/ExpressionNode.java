@@ -1,4 +1,4 @@
-package me.khudyakov.semanticanalyzer.components.semantictree;
+package me.khudyakov.semanticanalyzer.components.syntaxtree;
 
 import me.khudyakov.semanticanalyzer.components.atoms.Constant;
 import me.khudyakov.semanticanalyzer.editor.OutputAreaWriter;

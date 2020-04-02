@@ -1,9 +1,9 @@
 package me.khudyakov.semanticanalyzer.editor;
 
-import me.khudyakov.semanticanalyzer.components.semantictree.StatementListNode;
+import me.khudyakov.semanticanalyzer.components.syntaxtree.StatementListNode;
 import me.khudyakov.semanticanalyzer.program.Program;
 import me.khudyakov.semanticanalyzer.program.ProgramCode;
-import me.khudyakov.semanticanalyzer.program.SemanticTree;
+import me.khudyakov.semanticanalyzer.program.SyntaxTree;
 import me.khudyakov.semanticanalyzer.service.*;
 
 import javax.swing.*;
@@ -20,7 +20,7 @@ public class CodeChangedListener implements DocumentListener {
     private final EditorGUI editorGUI;
 
     private final CodeParser codeParser = new CodeParserImpl();
-    private final StaticAnalyzer staticAnalyzer = new StaticAnalyzerImpl();
+    private final SyntaxAnalyzer syntaxAnalyzer = new SyntaxAnalyzerImpl();
     private final FeatureFinder framingIfFinder = new FramingIfFeatureFinder();
 
     // version of program before update event
@@ -30,8 +30,8 @@ public class CodeChangedListener implements DocumentListener {
     public CodeChangedListener(EditorGUI editorGUI) {
         this.editorGUI = editorGUI;
         ProgramCode programCode = new ProgramCode(Collections.emptyList());
-        SemanticTree semanticTree = new SemanticTree(new StatementListNode());
-        oldVersion = new Program(programCode, semanticTree);
+        SyntaxTree syntaxTree = new SyntaxTree(new StatementListNode());
+        oldVersion = new Program(programCode, syntaxTree);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class CodeChangedListener implements DocumentListener {
             }
             oldVersion = curVersion;
         } catch (Exception ex) {
-
+            // do nothing
         }
     }
 
@@ -56,7 +56,7 @@ public class CodeChangedListener implements DocumentListener {
         try {
             oldVersion = parseAndAnalyzeProgram();
         } catch (Exception ex) {
-
+            // do nothing
         }
     }
 
@@ -68,9 +68,9 @@ public class CodeChangedListener implements DocumentListener {
     private Program parseAndAnalyzeProgram() throws Exception {
         String text = getText();
         ProgramCode programCode = codeParser.parse(text);
-        SemanticTree semanticTree = staticAnalyzer.analyze(programCode);
+        SyntaxTree syntaxTree = syntaxAnalyzer.analyze(programCode);
 
-        return new Program(programCode, semanticTree);
+        return new Program(programCode, syntaxTree);
     }
 
     private String getText() {

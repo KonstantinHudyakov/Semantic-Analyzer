@@ -4,14 +4,14 @@ import me.khudyakov.semanticanalyzer.editor.EditorGUI;
 import me.khudyakov.semanticanalyzer.editor.OutputAreaWriter;
 import me.khudyakov.semanticanalyzer.program.Program;
 import me.khudyakov.semanticanalyzer.program.ProgramCode;
-import me.khudyakov.semanticanalyzer.program.SemanticTree;
+import me.khudyakov.semanticanalyzer.program.SyntaxTree;
 import me.khudyakov.semanticanalyzer.service.CodeParser;
 import me.khudyakov.semanticanalyzer.service.CodeParserImpl;
-import me.khudyakov.semanticanalyzer.service.StaticAnalyzer;
-import me.khudyakov.semanticanalyzer.service.StaticAnalyzerImpl;
+import me.khudyakov.semanticanalyzer.service.SyntaxAnalyzer;
+import me.khudyakov.semanticanalyzer.service.SyntaxAnalyzerImpl;
 import me.khudyakov.semanticanalyzer.util.ExpressionConverterException;
 import me.khudyakov.semanticanalyzer.util.ExpressionExecutionException;
-import me.khudyakov.semanticanalyzer.util.StaticAnalyzerException;
+import me.khudyakov.semanticanalyzer.util.SyntaxAnalyzerException;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -21,13 +21,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ProgramCodeExecutorTest {
 
-    private final StaticAnalyzer staticAnalyzer = new StaticAnalyzerImpl();
+    private final SyntaxAnalyzer syntaxAnalyzer = new SyntaxAnalyzerImpl();
     private final CodeParser codeParser = new CodeParserImpl();
 
     private static final EditorGUI editorGUI = new EditorGUI();
 
     @Test
-    void execute() throws IOException, ParseException, ExpressionConverterException, StaticAnalyzerException, ExpressionExecutionException {
+    void execute() throws IOException, ParseException, ExpressionConverterException, SyntaxAnalyzerException, ExpressionExecutionException {
         OutputAreaWriter.clear();
         String inputProgram = "@x  = 10;\n" +
                 "@second = 20;\n" +
@@ -37,8 +37,8 @@ class ProgramCodeExecutorTest {
                 "x*second + second/x*3;";
 
         ProgramCode programCode = codeParser.parse(inputProgram);
-        SemanticTree semanticTree = staticAnalyzer.analyze(programCode);
-        Program program = new Program(programCode, semanticTree);
+        SyntaxTree syntaxTree = syntaxAnalyzer.analyze(programCode);
+        Program program = new Program(programCode, syntaxTree);
 
         program.execute();
 
@@ -50,7 +50,7 @@ class ProgramCodeExecutorTest {
     }
 
     @Test
-    void execute2() throws IOException, ParseException, ExpressionConverterException, StaticAnalyzerException, ExpressionExecutionException {
+    void execute2() throws IOException, ParseException, ExpressionConverterException, SyntaxAnalyzerException, ExpressionExecutionException {
         OutputAreaWriter.clear();
         String inputProgram = "{ @ x= 2;\n" +
                 " @second = -3 ; }\n" +
@@ -62,8 +62,8 @@ class ProgramCodeExecutorTest {
                 "-x*second ; }";
 
         ProgramCode programCode = codeParser.parse(inputProgram);
-        SemanticTree semanticTree = staticAnalyzer.analyze(programCode);
-        Program program = new Program(programCode, semanticTree);
+        SyntaxTree syntaxTree = syntaxAnalyzer.analyze(programCode);
+        Program program = new Program(programCode, syntaxTree);
 
         program.execute();
 

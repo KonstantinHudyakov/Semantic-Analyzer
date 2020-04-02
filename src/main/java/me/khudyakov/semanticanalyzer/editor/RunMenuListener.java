@@ -2,11 +2,11 @@ package me.khudyakov.semanticanalyzer.editor;
 
 import me.khudyakov.semanticanalyzer.program.Program;
 import me.khudyakov.semanticanalyzer.program.ProgramCode;
-import me.khudyakov.semanticanalyzer.program.SemanticTree;
+import me.khudyakov.semanticanalyzer.program.SyntaxTree;
 import me.khudyakov.semanticanalyzer.service.CodeParser;
 import me.khudyakov.semanticanalyzer.service.CodeParserImpl;
-import me.khudyakov.semanticanalyzer.service.StaticAnalyzer;
-import me.khudyakov.semanticanalyzer.service.StaticAnalyzerImpl;
+import me.khudyakov.semanticanalyzer.service.SyntaxAnalyzer;
+import me.khudyakov.semanticanalyzer.service.SyntaxAnalyzerImpl;
 
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
@@ -18,7 +18,7 @@ public class RunMenuListener implements MenuListener {
     private final Document codeDocument;
 
     private final CodeParser codeParser = new CodeParserImpl();
-    private final StaticAnalyzer staticAnalyzer = new StaticAnalyzerImpl();
+    private final SyntaxAnalyzer syntaxAnalyzer = new SyntaxAnalyzerImpl();
 
     public RunMenuListener(Document codeDocument) {
         this.codeDocument = codeDocument;
@@ -29,16 +29,11 @@ public class RunMenuListener implements MenuListener {
         OutputAreaWriter.clear();
         String text = getText();
         try {
-            Program program = new Program();
             ProgramCode programCode = codeParser.parse(text);
-            program.setProgramCode(programCode);
-            SemanticTree semanticTree = staticAnalyzer.analyze(programCode);
-            program.setSemanticTree(semanticTree);
+            SyntaxTree syntaxTree = syntaxAnalyzer.analyze(programCode);
+            Program program = new Program(programCode, syntaxTree);
 
             program.execute();
-
-
-
         } catch (Exception ex) {
             OutputAreaWriter.setContent("Errors in the code!");
         }

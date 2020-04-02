@@ -23,6 +23,7 @@ public class CodeParserImpl implements CodeParser {
         List<Lexeme> code = new ArrayList<>();
         Map<String, Variable> variables = new HashMap<>();
         text = text.trim().replaceAll("\n", " ");
+        text = text.replaceAll("\t", " ");
         String[] tokens = text.split(" +");
         for (String token : tokens) {
             parseToken(token, code, variables);

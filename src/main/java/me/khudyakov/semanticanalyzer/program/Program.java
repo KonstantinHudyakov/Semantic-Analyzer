@@ -5,18 +5,18 @@ import me.khudyakov.semanticanalyzer.util.ExpressionExecutionException;
 public class Program {
 
     private ProgramCode programCode;
-    private SemanticTree semanticTree;
+    private SyntaxTree syntaxTree;
 
     public Program() {
     }
 
     public void execute() throws ExpressionExecutionException {
-        semanticTree.getRoot().executeSubtree();
+        syntaxTree.getRoot().executeSubtree();
     }
 
-    public Program(ProgramCode programCode, SemanticTree semanticTree) {
+    public Program(ProgramCode programCode, SyntaxTree syntaxTree) {
         this.programCode = programCode;
-        this.semanticTree = semanticTree;
+        this.syntaxTree = syntaxTree;
     }
 
     public ProgramCode getProgramCode() {
@@ -27,11 +27,11 @@ public class Program {
         this.programCode = programCode;
     }
 
-    public SemanticTree getSemanticTree() {
-        return semanticTree;
+    public SyntaxTree getSyntaxTree() {
+        return syntaxTree;
     }
 
-    public void setSemanticTree(SemanticTree semanticTree) {
-        this.semanticTree = semanticTree;
+    public void setSyntaxTree(SyntaxTree syntaxTree) {
+        this.syntaxTree = syntaxTree;
     }
 }

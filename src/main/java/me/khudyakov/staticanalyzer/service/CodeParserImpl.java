@@ -22,7 +22,7 @@ public class CodeParserImpl implements CodeParser {
     public ProgramCode parse(String text) throws ParseException {
         List<Lexeme> code = new ArrayList<>();
         Map<String, Variable> variables = new HashMap<>();
-        text = text.trim().replaceAll("\n", " ");
+        text = text.trim().replaceAll("[\r\n]+", " ");
         text = text.replaceAll("\t", " ");
         String[] tokens = text.split(" +");
         for (String token : tokens) {

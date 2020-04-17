@@ -1,133 +1,138 @@
 package me.khudyakov.staticanalyzer.service;
 
-import me.khudyakov.staticanalyzer.components.*;
-import me.khudyakov.staticanalyzer.components.atoms.Atom;
-import me.khudyakov.staticanalyzer.components.atoms.Constant;
-import me.khudyakov.staticanalyzer.components.atoms.Variable;
-import me.khudyakov.staticanalyzer.components.brackets.CloseBrace;
-import me.khudyakov.staticanalyzer.components.brackets.CloseParenthesis;
-import me.khudyakov.staticanalyzer.components.brackets.OpenBrace;
-import me.khudyakov.staticanalyzer.components.brackets.OpenParenthesis;
-import me.khudyakov.staticanalyzer.components.operations.*;
+import me.khudyakov.staticanalyzer.entity.Token;
 import me.khudyakov.staticanalyzer.program.ProgramCode;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import static me.khudyakov.staticanalyzer.entity.TokenType.*;
 
 public class CodeParserImpl implements CodeParser {
 
     public ProgramCode parse(String text) throws ParseException {
         List<Token> code = new ArrayList<>();
-        Map<String, Variable> variables = new HashMap<>();
-        text = text.trim().replaceAll("[\r\n]+", " ");
-        text = text.replaceAll("\t", " ");
-        String[] tokens = text.split(" +");
-        for (String token : tokens) {
-            parseToken(token, code, variables);
+        text = text.trim().replaceAll("[\r\n\t]+", " ");
+        String[] words = text.split(" +");
+        for (String word : words) {
+            code.addAll(parseTokens(word));
         }
         return new ProgramCode(code);
     }
 
-    private void parseToken(String token, List<Token> lexemes, Map<String, Variable> variables) throws ParseException {
-        char[] arr = token.toCharArray();
-        int n = token.length();
+    private List<Token> parseTokens(String word) throws ParseException {
+        List<Token> code = new ArrayList<>();
+        char[] arr = word.toCharArray();
+        int n = word.length();
+        Token token = null;
         for (int i = 0; i < n; i++) {
             switch (arr[i]) {
                 case '@': {
-                    lexemes.add(new AssignIdentifier());
+                    token = new Token("@", ASSIGN_IDENTIFIER);
                     break;
                 }
                 case '=': {
-                    lexemes.add(new Assign());
+                    token = new Token("=", ASSIGN);
                     break;
                 }
                 case ';': {
-                    lexemes.add(new Semicolon());
+                    token = new Token(";", SEMICOLON);
                     break;
                 }
                 case '(': {
-                    lexemes.add(new OpenParenthesis());
+                    token = new Token("(", OPEN_PARENTHESIS);
                     break;
                 }
                 case ')': {
-                    lexemes.add(new CloseParenthesis());
+                    token = new Token(")", CLOSE_PARENTHESIS);
                     break;
                 }
                 case '{': {
-                    lexemes.add(new OpenBrace());
+                    token = new Token("{", OPEN_BRACE);
                     break;
                 }
                 case '}': {
-                    lexemes.add(new CloseBrace());
+                    token = new Token("}", CLOSE_BRACE);
                     break;
                 }
                 case '+': {
-                    lexemes.add(new Addition());
-                    break;
-                }
-                case '*': {
-                    lexemes.add(new Multiplication());
-                    break;
-                }
-                case '/': {
-                    lexemes.add(new Division());
-                    break;
-                }
-                case '>': {
-                    lexemes.add(new Greater());
-                    break;
-                }
-                case '<': {
-                    lexemes.add(new Less());
+                    if(i + 1 < n && Character.isDigit(arr[i + 1])) {
+                        // it is integer with sign +
+                        token = readInteger(word, i);
+                        i += token.getValue().length() - 1;
+                    } else {
+                        token = new Token("+", ADDITION);
+                    }
                     break;
                 }
                 case '-': {
-                    if (!lexemes.isEmpty() && lexemes.get(lexemes.size() - 1) instanceof Atom) {
-                        lexemes.add(new Subtraction());
+                    if(i + 1 < n && Character.isDigit(arr[i + 1])) {
+                        // it is integer with sign -
+                        token = readInteger(word, i);
+                        i += token.getValue().length() - 1;
                     } else {
-                        lexemes.add(new UnarySubtraction());
+                        token = new Token("-", SUBTRACTION);
                     }
+                    break;
+                }
+                case '*': {
+                    token = new Token("*", MULTIPLICATION);
+                    break;
+                }
+                case '/': {
+                    token = new Token("/", DIVISION);
+                    break;
+                }
+                case '>': {
+                    token = new Token(">", GREATER);
+                    break;
+                }
+                case '<': {
+                    token = new Token("<", LESS);
                     break;
                 }
                 default: {
                     if (Character.isDigit(arr[i])) {
-                        StringBuilder numBuilder = new StringBuilder();
-                        numBuilder.append(arr[i]);
-                        while (i + 1 < n && Character.isDigit(arr[i + 1])) {
-                            numBuilder.append(arr[i + 1]);
-                            i++;
-                        }
-                        int constant = Integer.parseInt(numBuilder.toString());
-                        lexemes.add(new Constant(constant));
+                        token = readInteger(word, i);
                     } else if (Character.isLetter(arr[i])) {
-                        StringBuilder varBuilder = new StringBuilder();
-                        varBuilder.append(arr[i]);
-                        while (i + 1 < n && Character.isLetter(arr[i + 1])) {
-                            varBuilder.append(arr[i + 1]);
-                            i++;
-                        }
-                        String var = varBuilder.toString();
-                        if("if".equals(var)) {
-                            lexemes.add(new IfStatement());
-                        } else {
-                            // Если такая переменная уже объявлена, то добавляем ссылку на неё, а не создаём заново
-                            Variable variable = null;
-                            if(variables.containsKey(var)) {
-                                variable = variables.get(var);
-                            } else {
-                                variable = new Variable(var);
-                                variables.put(var, variable);
-                            }
-                            lexemes.add(variable);
-                        }
+                        token = readIdentifier(word, i);
                     } else {
-                        throw new ParseException(String.format("Некорректный символ '%s' в выражении \"%s\"", arr[i], token), i);
+                        throw new ParseException(String.format("Некорректный символ '%s' в выражении \"%s\"", arr[i], word), i);
                     }
+                    i += token.getValue().length() - 1;
                 }
             }
+            code.add(token);
         }
+        return code;
+    }
+
+    private Token readInteger(String word, int fromInd) throws ParseException {
+        StringBuilder intBuilder = new StringBuilder();
+        if(word.charAt(fromInd) == '-') {
+            intBuilder.append('-');
+            fromInd++;
+        } else if(word.charAt(fromInd) == '+') {
+            fromInd++;
+        }
+        for(int i = fromInd; i < word.length() && Character.isDigit(word.charAt(i)); i++) {
+            intBuilder.append(word.charAt(i));
+        }
+        try {
+            // check that value belongs to the Integer interval
+            int constant = Integer.parseInt(intBuilder.toString());
+            return new Token(String.valueOf(constant), INTEGER);
+        } catch (NumberFormatException ex) {
+            throw new ParseException("Numerical value is out of range for type Integer, value = " + intBuilder.toString(), fromInd);
+        }
+    }
+
+    private Token readIdentifier(String word, int fromInd) {
+        StringBuilder idBuilder = new StringBuilder();
+        for(int i = fromInd; i < word.length() && Character.isLetter(word.charAt(i)); i++) {
+            idBuilder.append(word.charAt(i));
+        }
+        return new Token(idBuilder.toString(), IDENTIFIER);
     }
 }

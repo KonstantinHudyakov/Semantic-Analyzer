@@ -25,7 +25,7 @@ public class CodeParserImpl implements CodeParser {
         List<Token> code = new ArrayList<>();
         char[] arr = word.toCharArray();
         int n = word.length();
-        Token token = null;
+        Token token;
         for (int i = 0; i < n; i++) {
             switch (arr[i]) {
                 case '@': {
@@ -97,6 +97,9 @@ public class CodeParserImpl implements CodeParser {
                         token = readInteger(word, i);
                     } else if (Character.isLetter(arr[i])) {
                         token = readIdentifier(word, i);
+                        if("if".equals(token.getValue())) {
+                            token = new Token("if", IF);
+                        }
                     } else {
                         throw new ParseException(String.format("Некорректный символ '%s' в выражении \"%s\"", arr[i], word), i);
                     }

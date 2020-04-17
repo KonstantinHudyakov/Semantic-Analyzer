@@ -1,17 +1,14 @@
-package me.khudyakov.staticanalyzer;
+package me.khudyakov.staticanalyzer.service;
 
 import me.khudyakov.staticanalyzer.program.ProgramCode;
-import me.khudyakov.staticanalyzer.service.CodeParser;
-import me.khudyakov.staticanalyzer.service.CodeParserImpl;
 import org.junit.jupiter.api.Test;
 
 import java.text.ParseException;
 
+import static me.khudyakov.staticanalyzer.service.ServiceUtils.codeParser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CodeParserTest {
-
-    private final CodeParser codeParser = new CodeParserImpl();
 
     @Test
     void parse() throws ParseException {

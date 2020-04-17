@@ -1,19 +1,19 @@
 package me.khudyakov.staticanalyzer.program;
 
-import me.khudyakov.staticanalyzer.components.Lexeme;
+import me.khudyakov.staticanalyzer.components.Token;
 
 import java.util.Iterator;
 import java.util.List;
 
 public class ProgramCode {
 
-    private List<Lexeme> program;
+    private List<Token> program;
 
-    public ProgramCode(List<Lexeme> program) {
+    public ProgramCode(List<Token> program) {
         this.program = program;
     }
 
-    public void setProgram(List<Lexeme> program) {
+    public void setProgram(List<Token> program) {
         this.program = program;
     }
 
@@ -29,11 +29,11 @@ public class ProgramCode {
         return program.contains(o);
     }
 
-    public Iterator<Lexeme> iterator() {
+    public Iterator<Token> iterator() {
         return program.iterator();
     }
 
-    public Lexeme get(int index) {
+    public Token get(int index) {
         return program.get(index);
     }
 
@@ -45,7 +45,7 @@ public class ProgramCode {
         return program.lastIndexOf(o);
     }
 
-    public List<Lexeme> subList(int fromIndex, int toIndex) {
+    public List<Token> subList(int fromIndex, int toIndex) {
         return program.subList(fromIndex, toIndex);
     }
 

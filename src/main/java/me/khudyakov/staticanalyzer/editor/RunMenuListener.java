@@ -4,9 +4,7 @@ import me.khudyakov.staticanalyzer.program.Program;
 import me.khudyakov.staticanalyzer.program.ProgramCode;
 import me.khudyakov.staticanalyzer.program.SyntaxTree;
 import me.khudyakov.staticanalyzer.service.CodeParser;
-import me.khudyakov.staticanalyzer.service.CodeParserImpl;
 import me.khudyakov.staticanalyzer.service.SyntaxAnalyzer;
-import me.khudyakov.staticanalyzer.service.SyntaxAnalyzerImpl;
 
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
@@ -17,11 +15,13 @@ public class RunMenuListener implements MenuListener {
 
     private final Document codeDocument;
 
-    private final CodeParser codeParser = new CodeParserImpl();
-    private final SyntaxAnalyzer syntaxAnalyzer = new SyntaxAnalyzerImpl();
+    private final CodeParser codeParser;
+    private final SyntaxAnalyzer syntaxAnalyzer;
 
-    public RunMenuListener(Document codeDocument) {
+    public RunMenuListener(Document codeDocument, CodeParser codeParser, SyntaxAnalyzer syntaxAnalyzer) {
         this.codeDocument = codeDocument;
+        this.codeParser = codeParser;
+        this.syntaxAnalyzer = syntaxAnalyzer;
     }
 
     @Override

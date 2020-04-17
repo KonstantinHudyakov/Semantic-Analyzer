@@ -1,14 +1,10 @@
-package me.khudyakov.staticanalyzer;
+package me.khudyakov.staticanalyzer.service;
 
 import me.khudyakov.staticanalyzer.editor.EditorGUI;
 import me.khudyakov.staticanalyzer.editor.OutputAreaWriter;
 import me.khudyakov.staticanalyzer.program.Program;
 import me.khudyakov.staticanalyzer.program.ProgramCode;
 import me.khudyakov.staticanalyzer.program.SyntaxTree;
-import me.khudyakov.staticanalyzer.service.CodeParser;
-import me.khudyakov.staticanalyzer.service.CodeParserImpl;
-import me.khudyakov.staticanalyzer.service.SyntaxAnalyzer;
-import me.khudyakov.staticanalyzer.service.SyntaxAnalyzerImpl;
 import me.khudyakov.staticanalyzer.util.ExpressionConverterException;
 import me.khudyakov.staticanalyzer.util.ExpressionExecutionException;
 import me.khudyakov.staticanalyzer.util.SyntaxAnalyzerException;
@@ -19,7 +15,7 @@ import java.text.ParseException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ProgramCodeExecutorTest {
+class ProgramExecutionTest {
 
     private final SyntaxAnalyzer syntaxAnalyzer = new SyntaxAnalyzerImpl();
     private final CodeParser codeParser = new CodeParserImpl();

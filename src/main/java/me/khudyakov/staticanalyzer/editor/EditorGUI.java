@@ -1,5 +1,7 @@
 package me.khudyakov.staticanalyzer.editor;
 
+import me.khudyakov.staticanalyzer.service.*;
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.text.Document;
@@ -14,6 +16,11 @@ public class EditorGUI extends JFrame implements ActionListener {
     public static void main(String[] args) {
         new EditorGUI();
     }
+
+    private final CodeParser codeParser = new CodeParserImpl();
+    private final SyntaxAnalyzer syntaxAnalyzer = new SyntaxAnalyzerImpl();
+    private final SyntaxTreeChangesCache syntaxTreeChangesCache = new SyntaxTreeChangesCache(3);
+    private final FeatureFinder framingIfFinder = new FramingIfFeatureFinder();
 
     // Menus
     private JMenu fileMenu;
@@ -90,7 +97,7 @@ public class EditorGUI extends JFrame implements ActionListener {
         codeAreaScroll.setPreferredSize(new Dimension(800, 350));
 
         Document document = codeArea.getDocument();
-        document.addDocumentListener(new CodeChangedListener(this));
+        document.addDocumentListener(new CodeChangedListener(this, codeParser, syntaxAnalyzer, syntaxTreeChangesCache, framingIfFinder));
 
         return codeArea;
     }
@@ -172,7 +179,7 @@ public class EditorGUI extends JFrame implements ActionListener {
     private void runMenu() {
         runMenu = new JMenu("Run");
         runMenu.setPreferredSize(new Dimension(40, 20));
-        runMenu.addMenuListener(new RunMenuListener(codeArea.getDocument()));
+        runMenu.addMenuListener(new RunMenuListener(codeArea.getDocument(), codeParser, syntaxAnalyzer));
     }
 
     @Override

@@ -1,6 +1,6 @@
 package me.khudyakov.staticanalyzer.program;
 
-import me.khudyakov.staticanalyzer.components.Lexeme;
+import me.khudyakov.staticanalyzer.components.Token;
 import me.khudyakov.staticanalyzer.components.atoms.Atom;
 import me.khudyakov.staticanalyzer.components.atoms.Constant;
 import me.khudyakov.staticanalyzer.components.operations.*;
@@ -8,18 +8,19 @@ import me.khudyakov.staticanalyzer.util.ExpressionExecutionException;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
 public class Expression {
 
-    private List<Lexeme> expr;
+    private List<Token> expr;
 
     public Constant execute() throws ExpressionExecutionException {
         try {
             Stack<Integer> st = new Stack<>();
             for (int i = 0; i < expr.size(); i++) {
-                Lexeme cur = expr.get(i);
+                Token cur = expr.get(i);
                 if (cur instanceof Atom) {
                     st.push(((Atom) cur).getValue());
                 } else if (cur instanceof UnaryOperation) {
@@ -37,15 +38,28 @@ public class Expression {
         }
     }
 
-    public Expression(List<Lexeme> expr) {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Expression that = (Expression) o;
+        return Objects.equals(expr, that.expr);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(expr);
+    }
+
+    public Expression(List<Token> expr) {
         this.expr = expr;
     }
 
-    public List<Lexeme> getExpr() {
+    public List<Token> getExpr() {
         return expr;
     }
 
-    public void setExpr(List<Lexeme> expr) {
+    public void setExpr(List<Token> expr) {
         this.expr = expr;
     }
 
@@ -61,11 +75,11 @@ public class Expression {
         return expr.contains(o);
     }
 
-    public Iterator<Lexeme> iterator() {
+    public Iterator<Token> iterator() {
         return expr.iterator();
     }
 
-    public Lexeme get(int index) {
+    public Token get(int index) {
         return expr.get(index);
     }
 
@@ -77,13 +91,13 @@ public class Expression {
         return expr.lastIndexOf(o);
     }
 
-    public List<Lexeme> subList(int fromIndex, int toIndex) {
+    public List<Token> subList(int fromIndex, int toIndex) {
         return expr.subList(fromIndex, toIndex);
     }
 
     public String toString() {
         return expr.stream()
-                   .map(Lexeme::toString)
+                   .map(Token::toString)
                    .collect(Collectors.joining());
     }
 }

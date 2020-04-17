@@ -1,11 +1,6 @@
-package me.khudyakov.staticanalyzer;
+package me.khudyakov.staticanalyzer.service;
 
-import me.khudyakov.staticanalyzer.program.ProgramCode;
 import me.khudyakov.staticanalyzer.program.SyntaxTree;
-import me.khudyakov.staticanalyzer.service.CodeParser;
-import me.khudyakov.staticanalyzer.service.CodeParserImpl;
-import me.khudyakov.staticanalyzer.service.SyntaxAnalyzer;
-import me.khudyakov.staticanalyzer.service.SyntaxAnalyzerImpl;
 import me.khudyakov.staticanalyzer.util.ExpressionConverterException;
 import me.khudyakov.staticanalyzer.util.ExpressionExecutionException;
 import me.khudyakov.staticanalyzer.util.SyntaxAnalyzerException;
@@ -13,12 +8,10 @@ import org.junit.jupiter.api.Test;
 
 import java.text.ParseException;
 
+import static me.khudyakov.staticanalyzer.service.ServiceUtils.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class SyntaxAnalyzerTest {
-
-    private final SyntaxAnalyzer syntaxAnalyzer = new SyntaxAnalyzerImpl();
-    private final CodeParser codeParser = new CodeParserImpl();
 
     @Test
     void analyze() throws SyntaxAnalyzerException, ExpressionConverterException, ParseException, ExpressionExecutionException {
@@ -28,10 +21,8 @@ class SyntaxAnalyzerTest {
                 "  x + 1;\n" +
                 "}\n" +
                 "x*second + second/x*3;";
-        ProgramCode programCode = codeParser.parse(inputProgram);
 
-        SyntaxTree syntaxTree = syntaxAnalyzer.analyze(programCode);
-
+        SyntaxTree syntaxTree = parseAndAnalyze(inputProgram);
         assertNotNull(syntaxTree);
     }
 
@@ -45,10 +36,33 @@ class SyntaxAnalyzerTest {
                 "}\n" +
                 "{ { x*second + second/x*3; } " +
                 "-x*second ; }";
-        ProgramCode programCode = codeParser.parse(inputProgram);
 
-        SyntaxTree syntaxTree = syntaxAnalyzer.analyze(programCode);
-
+        SyntaxTree syntaxTree = parseAndAnalyze(inputProgram);
         assertNotNull(syntaxTree);
+    }
+
+    @Test
+    void assignInput() throws ExpressionConverterException, ExpressionExecutionException, SyntaxAnalyzerException, ParseException {
+        String text1 = "@";
+        String text2 = "@x";
+        String text3 = "@x=";
+        String text4 = "@x=2";
+        String text5 = "@x=25";
+        String text6 = "@x=25;";
+
+        analyzeAndCatchExceptions(SyntaxAnalyzerException.class, text1, text2, text3, text4, text5);
+        assertNotNull(parseAndAnalyze(text6));
+    }
+
+    @Test
+    void testModifying() throws ExpressionConverterException, ExpressionExecutionException, SyntaxAnalyzerException, ParseException {
+        String text1 = "@x = 3; if(x > 1) { x * 3; }";
+        String text2 = "@x = 3; if(x > 1) { x + 3; }";
+        String text3 = "@x = 3; if(x > 1) x + 3;";
+        String text4 = "if(7 * 4 > 27) @x = 3; if(x > 1) x + 3;";
+        String text5 = "if(7 * 4 > 27) { @x = 3; if(x > 1) x + 3; }";
+        String text6 = "if(7 * 4 > 27) { @var = 3; if(x > 1) x + 3; }";
+
+        analyzeOrThrow(text1, text2, text3, text4, text5, text6);
     }
 }

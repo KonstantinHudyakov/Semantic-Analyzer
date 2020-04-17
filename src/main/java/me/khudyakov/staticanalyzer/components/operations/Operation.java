@@ -1,8 +1,8 @@
 package me.khudyakov.staticanalyzer.components.operations;
 
-import me.khudyakov.staticanalyzer.components.Lexeme;
+import me.khudyakov.staticanalyzer.components.Token;
 
-public abstract class Operation extends Lexeme {
+public abstract class Operation extends Token {
 
     public abstract String toString();
 }

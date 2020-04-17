@@ -1,6 +1,6 @@
 package me.khudyakov.staticanalyzer.service;
 
-import me.khudyakov.staticanalyzer.components.Lexeme;
+import me.khudyakov.staticanalyzer.components.Token;
 import me.khudyakov.staticanalyzer.components.atoms.Atom;
 import me.khudyakov.staticanalyzer.components.brackets.CloseParenthesis;
 import me.khudyakov.staticanalyzer.components.brackets.OpenParenthesis;
@@ -17,11 +17,11 @@ public class ExpressionConverterImpl implements ExpressionConverter {
     private final static String ERROR_MESSAGE_FORM = "Ошибка преобразования в постфиксную форму: ind = %d, expr = %s";
 
     public void convertToPostfix(Expression expr) throws ExpressionConverterException {
-        Stack<Lexeme> st = new Stack<>();
-        List<Lexeme> postfix = new ArrayList<>();
+        Stack<Token> st = new Stack<>();
+        List<Token> postfix = new ArrayList<>();
         int openParenthesisNum = 0;
         for (int i = 0; i < expr.size(); i++) {
-            Lexeme cur = expr.get(i);
+            Token cur = expr.get(i);
             if (cur instanceof Atom) {
                 postfix.add(cur);
             } else if (cur instanceof UnarySubtraction) {
@@ -74,9 +74,9 @@ public class ExpressionConverterImpl implements ExpressionConverter {
         expr.setExpr(postfix);
     }
 
-    private boolean checkExecution(List<Lexeme> expr) {
+    private boolean checkExecution(List<Token> expr) {
         int stackSize = 0;
-        for (Lexeme cur : expr) {
+        for (Token cur : expr) {
             if (cur instanceof Atom) {
                 stackSize++;
             } else if (cur instanceof UnaryOperation) {

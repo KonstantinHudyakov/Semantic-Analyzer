@@ -45,7 +45,7 @@ public class SyntaxAnalyzerImpl implements SyntaxAnalyzer {
 
     private TreeNode statement(ProgramCode programCode,
                                int ind) throws SyntaxAnalyzerException, ExpressionConverterException, ExpressionExecutionException {
-        Lexeme cur = programCode.get(ind);
+        Token cur = programCode.get(ind);
         TreeNode node = null;
         if (cur instanceof IfStatement) {
             node = ifStatement(programCode, ind);
@@ -55,6 +55,8 @@ public class SyntaxAnalyzerImpl implements SyntaxAnalyzer {
             node = blockStatement(programCode, ind);
         } else if (cur instanceof Atom || cur instanceof Operation || cur instanceof OpenParenthesis) {
             node = expressionStatement(programCode, ind);
+        } else {
+            throw new SyntaxAnalyzerException("Ошибка при чтении statement, ind = " + ind);
         }
         return node;
     }
@@ -72,7 +74,7 @@ public class SyntaxAnalyzerImpl implements SyntaxAnalyzer {
                 int beginExpr = ind;
                 int openParenthesisNum = 0;
                 while (ind < n && openParenthesisNum >= 0) {
-                    Lexeme cur = programCode.get(ind);
+                    Token cur = programCode.get(ind);
                     if (cur instanceof OpenParenthesis) {
                         openParenthesisNum++;
                     } else if (cur instanceof CloseParenthesis) {
@@ -95,6 +97,7 @@ public class SyntaxAnalyzerImpl implements SyntaxAnalyzer {
                     || programCode.get(ind) instanceof CloseBrace
                     || programCode.get(ind) instanceof Assign
                     || programCode.get(ind) instanceof Semicolon)) {
+                //int endInd = ind - 1;
                 TreeNode statement = statement(programCode, ind);
                 return new ConditionNode(expression, statement, beginInd, statement.getEndInd());
             }
@@ -118,7 +121,7 @@ public class SyntaxAnalyzerImpl implements SyntaxAnalyzer {
         while (ind < n && !(programCode.get(ind) instanceof Semicolon)) {
             ind++;
         }
-        if (ind >= n && !(programCode.get(ind) instanceof Semicolon)) {
+        if (ind >= n || !(programCode.get(ind) instanceof Semicolon)) {
             throw new SyntaxAnalyzerException("Ошибка при чтении assignStatement, ind = " + ind);
         }
         Expression expression = new Expression(programCode.subList(beginExpr, ind));

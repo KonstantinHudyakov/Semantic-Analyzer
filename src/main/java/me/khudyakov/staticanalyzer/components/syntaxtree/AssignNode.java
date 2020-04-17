@@ -5,6 +5,8 @@ import me.khudyakov.staticanalyzer.components.atoms.Constant;
 import me.khudyakov.staticanalyzer.components.atoms.Variable;
 import me.khudyakov.staticanalyzer.util.ExpressionExecutionException;
 
+import java.util.Objects;
+
 public class AssignNode extends StatementNode {
 
     private Variable variable;
@@ -24,6 +26,16 @@ public class AssignNode extends StatementNode {
         Constant res = expression.execute();
         variable.setValue(res.getValue());
     }
+
+    @Override
+    public boolean contentEquals(TreeNode node) {
+        if(this == node) return true;
+        if(node == null || getClass() != node.getClass()) return false;
+        AssignNode assignNode = (AssignNode) node;
+        return Objects.equals(expression, assignNode.getExpression())
+                && Objects.equals(variable, assignNode.getVariable());
+    }
+
 
     public Variable getVariable() {
         return variable;

@@ -5,18 +5,30 @@ import me.khudyakov.staticanalyzer.util.ExpressionExecutionException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class StatementListNode extends TreeNode {
 
-    private List<TreeNode> statements = new ArrayList<>();
+    private final List<TreeNode> statements = new ArrayList<>();
 
     @Override
     public void executeSubtree() throws ExpressionExecutionException {
         for (TreeNode statement : statements) {
             statement.executeSubtree();
         }
+    }
+
+    @Override
+    public boolean contentEquals(TreeNode node) {
+        return this == node || node != null && getClass() == node.getClass();
+        
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(statements);
     }
 
     public List<TreeNode> getStatements() {

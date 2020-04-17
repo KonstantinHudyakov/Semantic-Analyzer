@@ -1,6 +1,6 @@
 package me.khudyakov.staticanalyzer.components;
 
-public class AssignIdentifier extends Lexeme {
+public class AssignIdentifier extends Token {
 
     @Override
     public String toString() {

@@ -22,8 +22,4 @@ public class Token {
     public TokenType getType() {
         return type;
     }
-
-    public boolean isTypeOf(TokenType type) {
-        return this.type == type;
-    }
 }

@@ -10,7 +10,7 @@ public class Constant extends Expression {
 
     @Override
     public int execute() {
-        return 0;
+        return value;
     }
 
     public int getValue() {

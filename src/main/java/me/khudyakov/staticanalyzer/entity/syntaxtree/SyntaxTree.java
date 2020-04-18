@@ -1,8 +1,10 @@
 package me.khudyakov.staticanalyzer.entity.syntaxtree;
 
 import me.khudyakov.staticanalyzer.entity.syntaxtree.statement.BlockStatement;
+import me.khudyakov.staticanalyzer.entity.syntaxtree.statement.IfStatement;
 import me.khudyakov.staticanalyzer.entity.syntaxtree.statement.Statement;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class SyntaxTree {
@@ -11,33 +13,28 @@ public class SyntaxTree {
 
     private final List<Statement> dfsOrder;
 
-    public SyntaxTree(BlockStatement root, List<Statement> dfsOrder) {
+        public SyntaxTree(BlockStatement root) {
         this.root = root;
-        this.dfsOrder = dfsOrder;
+        dfsOrder = new LinkedList<>();
+        // adding dummy node to link it with first node
+        //dfsOrder.add(TreeNode.EMPTY_NODE);
+        traverseTree(root);
+        // removing dummy node
+        //dfsOrder.remove(0);
     }
 
-    //    public SyntaxTree(BlockStatement root) {
-//        this.root = root;
-//        dfsOrder = new LinkedList<>();
-//        // adding dummy node to link it with first node
-//        dfsOrder.add(TreeNode.EMPTY_NODE);
-//        traverseTree(root);
-//        // removing dummy node
-//        dfsOrder.remove(0);
-//    }
-//
-//    private void traverseTree(TreeNode root) {
-//        dfsOrder.get(dfsOrder.size() - 1).setNext(root);
-//        dfsOrder.add(root);
-//        if(root instanceof StatementListNode) {
-//            StatementListNode node = (StatementListNode) root;
-//            node.getStatements()
-//                .forEach(this::traverseTree);
-//        } else if(root instanceof ConditionNode) {
-//            ConditionNode node = (ConditionNode) root;
-//            traverseTree(node.getBody());
-//        }
-//    }
+    private void traverseTree(Statement root) {
+       // dfsOrder.get(dfsOrder.size() - 1).setNext(root);
+        dfsOrder.add(root);
+        if(root instanceof BlockStatement) {
+            BlockStatement node = (BlockStatement) root;
+            node.stream()
+                .forEach(this::traverseTree);
+        } else if(root instanceof IfStatement) {
+            IfStatement node = (IfStatement) root;
+            traverseTree(node.getBody());
+        }
+    }
 
     public int getSize() {
         return dfsOrder.size();

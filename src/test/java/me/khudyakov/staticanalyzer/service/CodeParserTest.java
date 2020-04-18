@@ -33,8 +33,8 @@ class CodeParserTest {
                 " @  x = x - 1 ;" +
                 "}\n" +
                 "{ { x*second + second/x*3; } " +
-                "-x*second ; }";
-        String expectedResult = "[{, @, x, =, 2, ;, @, second, =, -, 3, }, ;, if, (, second, -, 19, ), {, x, +, 1, ;, @, x, =, x, -, 1, ;, }, {, {, x, *, second, +, second, /, x, *, 3, ;, }, -, x, *, second, ;, }]";
+                "x*second ; }";
+        String expectedResult = "[{, @, x, =, 2, ;, @, second, =, -3, }, ;, if, (, second, -, 19, ), {, x, +, 1, ;, @, x, =, x, -, 1, ;, }, {, {, x, *, second, +, second, /, x, *, 3, ;, }, x, *, second, ;, }]";
 
         ProgramCode result = codeParser.parse(inputProgram);
         assertEquals(expectedResult, result.toString());

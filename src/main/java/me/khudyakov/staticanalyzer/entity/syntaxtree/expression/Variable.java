@@ -5,6 +5,10 @@ public class Variable extends Expression {
     public final String name;
     public Integer value;
 
+    public Variable(String name) {
+        this.name = name;
+    }
+
     public Variable(String name, Integer value) {
         this.name = name;
         this.value = value;

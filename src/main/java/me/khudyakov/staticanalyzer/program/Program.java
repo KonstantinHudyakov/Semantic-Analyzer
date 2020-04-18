@@ -1,17 +1,14 @@
 package me.khudyakov.staticanalyzer.program;
 
-import me.khudyakov.staticanalyzer.util.ExpressionExecutionException;
+import me.khudyakov.staticanalyzer.entity.syntaxtree.SyntaxTree;
 
 public class Program {
 
-    private ProgramCode programCode;
-    private SyntaxTree syntaxTree;
+    private final ProgramCode programCode;
+    private final SyntaxTree syntaxTree;
 
-    public Program() {
-    }
-
-    public void execute() throws ExpressionExecutionException {
-        syntaxTree.getRoot().executeSubtree();
+    public void execute() {
+        syntaxTree.getRoot().execute();
     }
 
     public Program(ProgramCode programCode, SyntaxTree syntaxTree) {
@@ -23,15 +20,7 @@ public class Program {
         return programCode;
     }
 
-    public void setProgramCode(ProgramCode programCode) {
-        this.programCode = programCode;
-    }
-
     public SyntaxTree getSyntaxTree() {
         return syntaxTree;
-    }
-
-    public void setSyntaxTree(SyntaxTree syntaxTree) {
-        this.syntaxTree = syntaxTree;
     }
 }

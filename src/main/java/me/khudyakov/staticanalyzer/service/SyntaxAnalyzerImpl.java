@@ -1,162 +1,268 @@
 package me.khudyakov.staticanalyzer.service;
 
-import me.khudyakov.staticanalyzer.components.*;
-import me.khudyakov.staticanalyzer.components.atoms.Atom;
-import me.khudyakov.staticanalyzer.components.atoms.Variable;
-import me.khudyakov.staticanalyzer.components.brackets.CloseBrace;
-import me.khudyakov.staticanalyzer.components.brackets.CloseParenthesis;
-import me.khudyakov.staticanalyzer.components.brackets.OpenBrace;
-import me.khudyakov.staticanalyzer.components.brackets.OpenParenthesis;
-import me.khudyakov.staticanalyzer.components.operations.Operation;
-import me.khudyakov.staticanalyzer.components.syntaxtree.*;
-import me.khudyakov.staticanalyzer.program.Expression;
+import me.khudyakov.staticanalyzer.entity.Token;
+import me.khudyakov.staticanalyzer.entity.TokenType;
+import me.khudyakov.staticanalyzer.entity.syntaxtree.SyntaxTree;
+import me.khudyakov.staticanalyzer.entity.syntaxtree.expression.BinaryOperation;
+import me.khudyakov.staticanalyzer.entity.syntaxtree.expression.Constant;
+import me.khudyakov.staticanalyzer.entity.syntaxtree.expression.Expression;
+import me.khudyakov.staticanalyzer.entity.syntaxtree.expression.Variable;
+import me.khudyakov.staticanalyzer.entity.syntaxtree.expression.operator.*;
+import me.khudyakov.staticanalyzer.entity.syntaxtree.statement.*;
 import me.khudyakov.staticanalyzer.program.ProgramCode;
-import me.khudyakov.staticanalyzer.program.SyntaxTree;
-import me.khudyakov.staticanalyzer.util.ExpressionConverterException;
-import me.khudyakov.staticanalyzer.util.ExpressionExecutionException;
 import me.khudyakov.staticanalyzer.util.SyntaxAnalyzerException;
+import me.khudyakov.staticanalyzer.util.TokenUtils;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
+import static me.khudyakov.staticanalyzer.entity.TokenType.*;
+import static me.khudyakov.staticanalyzer.util.TokenUtils.isExprStart;
+import static me.khudyakov.staticanalyzer.util.TokenUtils.isTokenOfType;
 
 public class SyntaxAnalyzerImpl implements SyntaxAnalyzer {
 
-    private final ExpressionConverterImpl expressionConverter = new ExpressionConverterImpl();
-
-    public SyntaxTree analyze(ProgramCode programCode) throws SyntaxAnalyzerException, ExpressionConverterException, ExpressionExecutionException {
-        StatementListNode statementListNode = statementList(programCode, 0);
-        if (statementListNode.getEndInd() + 1 != programCode.size()) {
-            throw new SyntaxAnalyzerException("Преждевременный конец программы, ind = " + statementListNode.getEndInd());
-        }
-        return new SyntaxTree(statementListNode);
+    @Override
+    public SyntaxTree createSyntaxTree(ProgramCode programCode) throws SyntaxAnalyzerException {
+        SyntaxTreeBuilder builder = new SyntaxTreeBuilder(programCode);
+        return builder.buildTree();
     }
 
-    private StatementListNode statementList(ProgramCode programCode,
-                                            int ind) throws SyntaxAnalyzerException, ExpressionConverterException, ExpressionExecutionException {
-        StatementListNode nodeList = new StatementListNode();
-        nodeList.setStartInd(ind);
-        while (ind < programCode.size()) {
-            TreeNode node = statement(programCode, ind);
-            nodeList.add(node);
-            ind = node.getEndInd() + 1;
-        }
-        nodeList.setEndInd(ind - 1);
-        return nodeList;
-    }
+    private static class SyntaxTreeBuilder {
 
-    private TreeNode statement(ProgramCode programCode,
-                               int ind) throws SyntaxAnalyzerException, ExpressionConverterException, ExpressionExecutionException {
-        Token cur = programCode.get(ind);
-        TreeNode node = null;
-        if (cur instanceof IfStatement) {
-            node = ifStatement(programCode, ind);
-        } else if (cur instanceof AssignIdentifier) {
-            node = assignStatement(programCode, ind);
-        } else if (cur instanceof OpenBrace) {
-            node = blockStatement(programCode, ind);
-        } else if (cur instanceof Atom || cur instanceof Operation || cur instanceof OpenParenthesis) {
-            node = expressionStatement(programCode, ind);
-        } else {
-            throw new SyntaxAnalyzerException("Ошибка при чтении statement, ind = " + ind);
-        }
-        return node;
-    }
+        private static final String ERROR = "Unexpected token \"%s\", ind = %d";
+        private static final String PREMATURE_END = "Error! Premature end of program";
 
-    private ConditionNode ifStatement(ProgramCode programCode,
-                                      int ind) throws SyntaxAnalyzerException, ExpressionConverterException, ExpressionExecutionException {
-        int n = programCode.size();
-        int beginInd = ind;
-        if (ind + 1 < n && programCode.get(ind + 1) instanceof OpenParenthesis) {
-            ind++;
-            Expression expression = null;
-            if (ind + 1 < n && (programCode.get(ind + 1) instanceof Atom || programCode.get(ind + 1) instanceof Operation
-                    || programCode.get(ind + 1) instanceof OpenParenthesis)) {
-                ind++;
-                int beginExpr = ind;
-                int openParenthesisNum = 0;
-                while (ind < n && openParenthesisNum >= 0) {
-                    Token cur = programCode.get(ind);
-                    if (cur instanceof OpenParenthesis) {
-                        openParenthesisNum++;
-                    } else if (cur instanceof CloseParenthesis) {
-                        openParenthesisNum--;
-                    }
-                    ind++;
-                }
-                if (ind >= n) {
-                    throw new SyntaxAnalyzerException("Ошибка при чтении ifStatement, ind = " + ind);
-                }
-                expression = new Expression(programCode.subList(beginExpr, ind - 1));
-                expressionConverter.convertToPostfix(expression);
-            } else if (ind + 1 < n && programCode.get(ind + 1) instanceof CloseParenthesis) {
-                expression = new Expression(Collections.emptyList());
-                ind += 2;
+        private final Map<String, Variable> varNameToVariable = new HashMap<>();
+
+        private final ProgramCode code;
+        private int curInd = 0;
+
+        SyntaxTreeBuilder(ProgramCode code) {
+            this.code = code;
+        }
+
+        SyntaxTree buildTree() throws SyntaxAnalyzerException {
+            int startInd = curInd;
+            List<Statement> statementList = statementList();
+            BlockStatement blockStatement = new BlockStatement(statementList, startInd, curInd - 1);
+            return new SyntaxTree(blockStatement);
+        }
+
+        private List<Statement> statementList() throws SyntaxAnalyzerException {
+            List<Statement> statements = new ArrayList<>();
+            while (curInd < code.size()) {
+                statements.add(statement());
+            }
+            return statements;
+        }
+
+        private Statement statement() throws SyntaxAnalyzerException {
+            Token token = getCurOrThrow();
+            Statement statement = null;
+            if (isTokenOfType(token, IF)) {
+                statement = ifStatement();
+            } else if (isTokenOfType(token, ASSIGN_IDENTIFIER)) {
+                statement = assignStatement();
+            } else if (isTokenOfType(token, OPEN_BRACE)) {
+                statement = blockStatement();
+            } else if (isExprStart(token)) {
+                statement = expressionStatement();
             } else {
-                throw new SyntaxAnalyzerException("Ошибка при чтении ifStatement, ind = " + ind);
+                throwError(token);
             }
-            if (!(programCode.get(ind) instanceof CloseParenthesis
-                    || programCode.get(ind) instanceof CloseBrace
-                    || programCode.get(ind) instanceof Assign
-                    || programCode.get(ind) instanceof Semicolon)) {
-                //int endInd = ind - 1;
-                TreeNode statement = statement(programCode, ind);
-                return new ConditionNode(expression, statement, beginInd, statement.getEndInd());
+            return statement;
+        }
+
+        private BlockStatement blockStatement() throws SyntaxAnalyzerException {
+            int startInd = curInd;
+            checkTypeOfCurOrThrow(OPEN_BRACE);
+            List<Statement> statementList = new ArrayList<>();
+            while (checkTypeOfCur(TokenUtils::isStatementStart)) {
+                statementList.add(statement());
+            }
+            checkTypeOfCurOrThrow(CLOSE_BRACE);
+
+            return new BlockStatement(statementList, startInd, curInd - 1);
+        }
+
+        private IfStatement ifStatement() throws SyntaxAnalyzerException {
+            int startInd = curInd;
+            checkTypeOfCurOrThrow(IF);
+            checkTypeOfCurOrThrow(OPEN_PARENTHESIS);
+            Expression condition = expression();
+            checkTypeOfCurOrThrow(CLOSE_PARENTHESIS);
+            int endInd = curInd - 1;
+            Statement body = statement();
+
+            return new IfStatement(condition, body, startInd, endInd);
+        }
+
+        private AssignStatement assignStatement() throws SyntaxAnalyzerException {
+            int startInd = curInd;
+            checkTypeOfCurOrThrow(ASSIGN_IDENTIFIER);
+            Variable variable = variable();
+            checkTypeOfCurOrThrow(ASSIGN);
+            Expression expr = expression();
+            checkTypeOfCurOrThrow(SEMICOLON);
+
+            return new AssignStatement(variable, expr, startInd, curInd - 1);
+        }
+
+        private ExpressionStatement expressionStatement() throws SyntaxAnalyzerException {
+            int startInd = curInd;
+            Expression expr = expression();
+            checkTypeOfCurOrThrow(SEMICOLON);
+
+            return new ExpressionStatement(expr, startInd, curInd - 1);
+        }
+
+        /**
+         * Заданная грамматика для арифметических выражений:
+         * Expression -> PlusMinusExpr | PlusMinusExpr > PlusMinusExpr | PlusMinusExpr < PlusMinusExpr
+         * PlusMinusExpr -> MultDivExpr | PlusMinusExpr + MultDivExpr | PlusMinusExpr - MultDivExpr
+         * MultDivExpr -> SimpleExpr | MultDivExpr * SimpleExpr | MultDivExpr / SimpleExpr
+         * SimpleExpression -> Identifier | Integer | ( Expression )
+         *
+         * Избавимся от левой рекурсии:
+         *
+         * Expression -> PlusMinusExpr | PlusMinusExpr > PlusMinusExpr | PlusMinusExpr < PlusMinusExpr
+         * PlusMinusExpr -> MultDivExpr | MultDivExpr + PlusMinusExpr2 | MultDivExpr - PlusMinusExpr2
+         * PlusMinusExpr2 -> MultDivExpr | MultDivExpr + PlusMinusExpr2 | MultDivExpr - PlusMinusExpr2
+         * MultDivExpr -> SimpleExpr | SimpleExpr * MultDivExpr2 | SimpleExpr / MultDivExpr2
+         * MultDivExpr2 -> SimpleExpr | SimpleExpr * MultDivExpr2 | SimpleExpr / MultDivExpr2
+         * SimpleExpression -> Identifier | Integer | ( Expression )
+         *
+         * Заменим левую рекурсию на цикл
+         */
+        private Expression expression() throws SyntaxAnalyzerException {
+            Expression leftExpr = plusMinusExpression();
+            if (checkTypeOfCur(TokenUtils::isCompareOperation)) {
+                Token cur = getCurOrThrow();
+                BinaryOperator operator = isTokenOfType(cur, GREATER) ? new GreaterOperator() : new LessOperator();
+                curInd++;
+                Expression rightExpr = plusMinusExpression();
+                return new BinaryOperation(operator, leftExpr, rightExpr);
+            }
+            return leftExpr;
+        }
+
+        /**
+         * PlusMinusExpr -> MultDivExpr | MultDivExpr + PlusMinusExpr2 | MultDivExpr - PlusMinusExpr2
+         * PlusMinusExpr2 -> MultDivExpr | MultDivExpr + PlusMinusExpr2 | MultDivExpr - PlusMinusExpr2
+         */
+        private Expression plusMinusExpression() throws SyntaxAnalyzerException {
+            Expression expr = multiplyDivisionExpression();
+            while (checkTypeOfCur(TokenUtils::isPlusMinus)) {
+                Token cur = getCurOrThrow();
+                BinaryOperator operator = isTokenOfType(cur, ADDITION) ? new AdditionOperator() : new SubtractionOperator();
+                curInd++;
+                Expression rightExpr = multiplyDivisionExpression();
+                expr = new BinaryOperation(operator, expr, rightExpr);
+            }
+            return expr;
+        }
+
+        /**
+         * MultDivExpr -> SimpleExpr | SimpleExpr * MultDivExpr2 | SimpleExpr / MultDivExpr2
+         * MultDivExpr2 -> SimpleExpr | SimpleExpr * MultDivExpr2 | SimpleExpr / MultDivExpr2
+         */
+        private Expression multiplyDivisionExpression() throws SyntaxAnalyzerException {
+            Expression expr = simpleExpression();
+            while (checkTypeOfCur(TokenUtils::isMultiplyDivision)) {
+                Token cur = getCurOrThrow();
+                BinaryOperator operator = isTokenOfType(cur, DIVISION) ? new DivisionOperator() : new MultiplicationOperator();
+                curInd++;
+                Expression rightExpr = simpleExpression();
+                expr = new BinaryOperation(operator, expr, rightExpr);
+            }
+            return expr;
+        }
+
+        /**
+         * SimpleExpression -> Identifier | Integer | ( Expression )
+         */
+        private Expression simpleExpression() throws SyntaxAnalyzerException {
+            Token cur = getCurOrThrow();
+            Expression expr = null;
+            if (isTokenOfType(cur, OPEN_PARENTHESIS)) {
+                curInd++;
+                expr = expression();
+                checkTypeOfCurOrThrow(CLOSE_PARENTHESIS);
+            } else if (isTokenOfType(cur, INTEGER)) {
+                int value = Integer.parseInt(cur.getValue());
+                expr = new Constant(value);
+                curInd++;
+            } else if (isTokenOfType(cur, IDENTIFIER)) {
+                expr = variable();
+            } else {
+                throwError(cur);
+            }
+
+            return expr;
+        }
+
+        private Variable variable() throws SyntaxAnalyzerException {
+            Token cur = getCurOrThrow();
+            if (!isTokenOfType(cur, IDENTIFIER)) {
+                throwError(cur);
+            }
+            String varName = cur.getValue();
+            Variable variable;
+            if (varNameToVariable.containsKey(varName)) {
+                variable = varNameToVariable.get(varName);
+            } else {
+                variable = new Variable(varName);
+                varNameToVariable.put(varName, variable);
+            }
+            curInd++;
+            return variable;
+        }
+
+
+        private boolean checkTypeOfCur(TokenType type) throws SyntaxAnalyzerException {
+            return checkTypeOfCur(token -> isTokenOfType(token, type));
+        }
+
+        private boolean checkTypeOfCur(Function<Token, Boolean> condition) throws SyntaxAnalyzerException {
+            Token cur = getCurOrThrow();
+            return condition.apply(cur);
+        }
+
+        private void checkTypeOfCurOrThrow(TokenType type) throws SyntaxAnalyzerException {
+            checkTypeOfCurOrThrow(token -> isTokenOfType(token, type));
+        }
+
+        private void checkTypeOfCurOrThrow(Function<Token, Boolean> condition) throws SyntaxAnalyzerException {
+            Token cur = getCurOrThrow();
+            throwIfNotTypeOf(cur, condition);
+            curInd++;
+        }
+
+        private void throwIfNotTypeOf(Token token, Function<Token, Boolean> condition) throws SyntaxAnalyzerException {
+            if (!condition.apply(token)) {
+                throwError(token);
             }
         }
-        throw new SyntaxAnalyzerException("Ошибка при чтении ifStatement, ind = " + ind);
+
+        private void throwIfNotTypeOf(Token token, TokenType type) throws SyntaxAnalyzerException {
+            if (!isTokenOfType(token, type)) {
+                throwError(token);
+            }
+        }
+
+        private Token getCurOrThrow() throws SyntaxAnalyzerException {
+            if (curInd >= code.size()) {
+                throw new SyntaxAnalyzerException(PREMATURE_END);
+            }
+            return code.get(curInd);
+        }
+
+        private void throwError(Token token) throws SyntaxAnalyzerException {
+            throw new SyntaxAnalyzerException(String.format(ERROR, token.getValue(), curInd));
+        }
     }
-
-    private AssignNode assignStatement(ProgramCode programCode,
-                                       int ind) throws SyntaxAnalyzerException, ExpressionConverterException, ExpressionExecutionException {
-        int n = programCode.size();
-        int beginInd = ind;
-        // Проверка на соответствие грамматике: Variable = Expression
-        if (ind + 3 >= n || !(programCode.get(ind + 1) instanceof Variable) || !(programCode.get(ind + 2) instanceof Assign)
-                || !(programCode.get(ind + 3) instanceof Atom || programCode.get(ind + 3) instanceof Operation
-                || programCode.get(ind + 3) instanceof OpenParenthesis)) {
-            throw new SyntaxAnalyzerException("Ошибка при чтении assignStatement, ind = " + ind);
-        }
-        Variable var = (Variable) programCode.get(ind + 1);
-        ind += 3;
-        int beginExpr = ind;
-        while (ind < n && !(programCode.get(ind) instanceof Semicolon)) {
-            ind++;
-        }
-        if (ind >= n || !(programCode.get(ind) instanceof Semicolon)) {
-            throw new SyntaxAnalyzerException("Ошибка при чтении assignStatement, ind = " + ind);
-        }
-        Expression expression = new Expression(programCode.subList(beginExpr, ind));
-        expressionConverter.convertToPostfix(expression);
-        return new AssignNode(expression, var, beginInd, ind);
-    }
-
-    private BlockStatementsNode blockStatement(ProgramCode programCode,
-                                               int ind) throws SyntaxAnalyzerException, ExpressionConverterException, ExpressionExecutionException {
-        int n = programCode.size();
-        BlockStatementsNode nodeList = new BlockStatementsNode();
-        nodeList.setStartInd(ind);
-        ind++;
-        while (ind < n && !(programCode.get(ind) instanceof CloseBrace)) {
-            TreeNode node = statement(programCode, ind);
-            nodeList.add(node);
-            ind = node.getEndInd() + 1;
-        }
-        if (ind >= n) {
-            throw new SyntaxAnalyzerException("Преждевременный конец программы, ind = " + ind);
-        }
-        nodeList.setEndInd(ind);
-        return nodeList;
-    }
-
-    private ExpressionNode expressionStatement(ProgramCode programCode,
-                                               int ind) throws ExpressionConverterException, ExpressionExecutionException {
-        int beginInd = ind;
-        while (ind < programCode.size() && !(programCode.get(ind) instanceof Semicolon)) {
-            ind++;
-        }
-
-        Expression expression = new Expression(programCode.subList(beginInd, ind));
-        expressionConverter.convertToPostfix(expression);
-        return new ExpressionNode(expression, beginInd, ind);
-    }
-
 }

@@ -3,15 +3,12 @@ package me.khudyakov.staticanalyzer.editor;
 import me.khudyakov.staticanalyzer.service.*;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.text.Document;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-public class EditorGUI extends JFrame implements ActionListener {
+public class EditorGUI extends JFrame {
 
     public static void main(String[] args) {
         new EditorGUI();
@@ -22,55 +19,32 @@ public class EditorGUI extends JFrame implements ActionListener {
     private final SyntaxTreeChangesCache syntaxTreeChangesCache = new SyntaxTreeChangesCache(3);
     private final FeatureFinder framingIfFinder = new FramingIfFeatureFinder();
 
-    // Menus
-    private JMenu fileMenu;
-    private JMenu runMenu;
-    private JMenuItem exit;
-
-    // Window
-    private JFrame editorWindow;
-    private JPanel contentPane;
-    private Border contentPaneBorder;
-
-    // Text Area
-    private JTextArea codeArea;
-    private Border codeAreaBorder;
-    private JScrollPane codeAreaScroll;
-    private Font textFont;
-
-    // Output Area
-    private JTextArea outputArea;
-    private Border outputAreaBorder;
-    private JScrollPane outputAreaScroll;
+    private final JTextArea codeArea;
 
     public EditorGUI() {
         super("JavaEdit");
+        codeArea = createCodeArea();
+        JScrollPane codeAreaScroll = new JScrollPane(codeArea);
+        codeAreaScroll.setPreferredSize(new Dimension(800, 350));
 
-        // Create Text Area
-        createCodeArea();
-        createOutputArea();
+        JTextArea outputArea = createOutputArea();
+        JScrollPane outputAreaScroll = new JScrollPane(outputArea);
+        outputAreaScroll.setPreferredSize(new Dimension(800, 150));
 
-        // Create Menus
-        fileMenu();
-        runMenu();
-
-        // Create Window
-        createEditorWindow();
+        createEditorWindow(codeAreaScroll, outputAreaScroll);
     }
 
-    private JFrame createEditorWindow() {
-        editorWindow = new JFrame("Simple IDE");
+    private void createEditorWindow(JScrollPane codeAreaScroll, JScrollPane outputAreaScroll) {
+        JFrame editorWindow = new JFrame("Simple IDE");
         editorWindow.setVisible(true);
 
         editorWindow.setDefaultCloseOperation(EXIT_ON_CLOSE);
-        // Create Menu Bar
         editorWindow.setJMenuBar(createMenuBar());
 
         BorderLayout borderLayout = new BorderLayout();
         borderLayout.setVgap(20);
-        contentPane = new JPanel(borderLayout);
-        contentPaneBorder = BorderFactory.createBevelBorder(0, Color.WHITE, Color.WHITE);
-        contentPane.setBorder(contentPaneBorder);
+        JPanel contentPane = new JPanel(borderLayout);
+        contentPane.setBorder(BorderFactory.createBevelBorder(0, Color.WHITE, Color.WHITE));
 
         contentPane.add(codeAreaScroll, BorderLayout.CENTER);
         contentPane.add(outputAreaScroll, BorderLayout.SOUTH);
@@ -80,41 +54,6 @@ public class EditorGUI extends JFrame implements ActionListener {
         // Centers application on screen
         editorWindow.setLocationRelativeTo(null);
         editorWindow.setPreferredSize(new Dimension(800, 500));
-
-        return editorWindow;
-    }
-
-    private JTextArea createCodeArea() {
-        codeAreaBorder = BorderFactory.createBevelBorder(0, Color.WHITE, Color.WHITE);
-        codeArea = new JTextArea(10, 50);
-        codeArea.setEditable(true);
-        codeArea.setBorder(BorderFactory.createLoweredBevelBorder());
-
-        textFont = new Font("Consolas", 0, 16);
-        codeArea.setFont(textFont);
-
-        codeAreaScroll = new JScrollPane(codeArea);
-        codeAreaScroll.setPreferredSize(new Dimension(800, 350));
-
-        Document document = codeArea.getDocument();
-        document.addDocumentListener(new CodeChangedListener(this, codeParser, syntaxAnalyzer, syntaxTreeChangesCache, framingIfFinder));
-
-        return codeArea;
-    }
-
-    private JTextArea createOutputArea() {
-        outputAreaBorder = BorderFactory.createBevelBorder(0, Color.WHITE, Color.WHITE);
-        outputArea = new JTextArea(5, 50);
-        OutputAreaWriter.setOutputArea(outputArea);
-        outputArea.setEditable(false);
-        outputArea.setBorder(BorderFactory.createLoweredBevelBorder());
-
-        outputArea.setFont(textFont);
-
-        outputAreaScroll = new JScrollPane(outputArea);
-        outputAreaScroll.setPreferredSize(new Dimension(800, 150));
-
-        return outputArea;
     }
 
     public void showPopupLabel(String text, int x, int y) {
@@ -154,46 +93,59 @@ public class EditorGUI extends JFrame implements ActionListener {
         popup.show();
     }
 
+    private JTextArea createCodeArea() {
+        JTextArea codeArea = new JTextArea(10, 50);
+        codeArea.setEditable(true);
+        codeArea.setBorder(BorderFactory.createLoweredBevelBorder());
+        codeArea.setFont(new Font("Consolas", Font.PLAIN, 16));
+
+        Document document = codeArea.getDocument();
+        document.addDocumentListener(new CodeChangedListener(this, codeParser, syntaxAnalyzer, syntaxTreeChangesCache, framingIfFinder));
+
+        return codeArea;
+    }
+
+    private JTextArea createOutputArea() {
+        JTextArea outputArea = new JTextArea(5, 50);
+        OutputAreaWriter.setOutputArea(outputArea);
+        outputArea.setEditable(false);
+        outputArea.setBorder(BorderFactory.createLoweredBevelBorder());
+        outputArea.setFont(new Font("Consolas", Font.PLAIN, 16));
+
+        return outputArea;
+    }
+
     private JMenuBar createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
         setJMenuBar(menuBar);
-        menuBar.add(fileMenu);
-        menuBar.add(runMenu);
+        menuBar.add(fileMenu());
+        menuBar.add(runMenu());
 
         return menuBar;
     }
 
-    private void fileMenu() {
-        // Create File Menu
-        fileMenu = new JMenu("File");
+    private JMenu fileMenu() {
+        JMenu fileMenu = new JMenu("File");
         fileMenu.setPreferredSize(new Dimension(40, 20));
 
-        exit = new JMenuItem("Exit");
-        exit.addActionListener(this);
+        JMenuItem exit = new JMenuItem("Exit");
         exit.setPreferredSize(new Dimension(100, 20));
         exit.setEnabled(true);
+        exit.addActionListener(e -> System.exit(0));
 
         fileMenu.add(exit);
+        return fileMenu;
     }
 
-    private void runMenu() {
-        runMenu = new JMenu("Run");
+    private JMenu runMenu() {
+        JMenu runMenu = new JMenu("Run");
         runMenu.setPreferredSize(new Dimension(40, 20));
         runMenu.addMenuListener(new RunMenuListener(codeArea.getDocument(), codeParser, syntaxAnalyzer));
-    }
 
-    @Override
-    public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == exit) {
-            System.exit(0);
-        }
+        return runMenu;
     }
 
     public JTextArea getCodeArea() {
         return codeArea;
-    }
-
-    public void setCodeArea(JTextArea text) {
-        codeArea = text;
     }
 }

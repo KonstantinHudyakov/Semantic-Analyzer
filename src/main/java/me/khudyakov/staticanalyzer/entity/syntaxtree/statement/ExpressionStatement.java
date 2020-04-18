@@ -33,6 +33,7 @@ public class ExpressionStatement extends Statement {
     }
 
 
+    // this method may be used in future
     public Expression getExpression() {
         return expression;
     }

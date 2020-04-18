@@ -15,6 +15,7 @@ public class Constant extends Expression {
         return value;
     }
 
+    // this method may be used in future
     public int getValue() {
         return value;
     }

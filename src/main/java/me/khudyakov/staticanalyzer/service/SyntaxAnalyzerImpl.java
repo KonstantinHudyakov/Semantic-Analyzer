@@ -241,7 +241,7 @@ public class SyntaxAnalyzerImpl implements SyntaxAnalyzer {
             return variable;
         }
 
-
+        // this method may be used with another argument in future modifications
         private boolean checkTypeOfCur(TokenType type) throws SyntaxAnalyzerException {
             return checkTypeOfCur(token -> isTokenOfType(token, type));
         }

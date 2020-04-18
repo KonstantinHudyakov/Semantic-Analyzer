@@ -27,10 +27,12 @@ public class BlockStatement extends Statement {
         return statements.size();
     }
 
+    // this method may be used in future
     public Statement get(int index) {
         return statements.get(index);
     }
 
+    // this method may be used in future
     public Stream<? extends Statement> stream() {
         return statements.stream();
     }

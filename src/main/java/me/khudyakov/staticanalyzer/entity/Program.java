@@ -16,6 +16,7 @@ public class Program {
         this.syntaxTree = syntaxTree;
     }
 
+    // this method may be used in future
     public ProgramCode getProgramCode() {
         return programCode;
     }

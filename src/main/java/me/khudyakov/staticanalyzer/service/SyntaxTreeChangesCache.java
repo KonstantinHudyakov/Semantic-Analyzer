@@ -23,7 +23,7 @@ public class SyntaxTreeChangesCache {
         Pair<Statement, Statement> diff = findDiff(prevTree, curTree);
         Statement prevVersion = diff.getKey();
         Statement curVersion = diff.getValue();
-        SyntaxTreeChange newChange = null;
+        SyntaxTreeChange newChange;
         if (prevVersion == Statement.EMPTY_STATEMENT && curVersion == Statement.EMPTY_STATEMENT) {
             // nothing changed
             return false;

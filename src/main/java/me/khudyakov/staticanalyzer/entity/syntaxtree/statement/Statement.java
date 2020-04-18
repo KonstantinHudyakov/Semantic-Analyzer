@@ -34,7 +34,11 @@ public abstract class Statement {
 
     public abstract List<? extends Statement> getChildren();
 
-    public boolean contentEquals(Statement statement) {
+    /** Checks that statements are equal exclude their children
+     * @param statement another Statement
+     * @return true if statement classes are equal and they have equal length and position (and content in concrete statements)
+     */
+    public boolean contentEquals(Statement statement) { // this inspection does not fit the current context.
         if (this == statement) return true;
         return statement != null
                 && getClass() == statement.getClass()

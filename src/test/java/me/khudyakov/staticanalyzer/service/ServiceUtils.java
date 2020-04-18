@@ -44,6 +44,7 @@ public class ServiceUtils {
         }
     }
 
+    // this method may be used with another argument in future
     static void analyzeAndCatchExceptions(Class<? extends Throwable> expectedException, String... codes) {
         Arrays.stream(codes)
               .forEach(code -> assertThrows(expectedException, () -> parseAndAnalyze(code)));

@@ -24,6 +24,6 @@ public class SyntaxTreeChange {
 
 
     public enum ChangeType {
-        INSERT, REMOVE, EDIT, NOTHING;
+        INSERT, REMOVE, EDIT, NOTHING
     }
 }

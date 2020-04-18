@@ -34,6 +34,7 @@ public class IfStatement extends Statement {
                 && condition.equals(((IfStatement) statement).condition);
     }
 
+    // this method may be used in future
     public Expression getCondition() {
         return condition;
     }

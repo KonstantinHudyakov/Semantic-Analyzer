@@ -4,7 +4,6 @@ import me.khudyakov.staticanalyzer.entity.Token;
 import me.khudyakov.staticanalyzer.entity.TokenType;
 
 import static me.khudyakov.staticanalyzer.entity.TokenType.*;
-import static me.khudyakov.staticanalyzer.entity.TokenType.ASSIGN_IDENTIFIER;
 
 public class TokenUtils {
 

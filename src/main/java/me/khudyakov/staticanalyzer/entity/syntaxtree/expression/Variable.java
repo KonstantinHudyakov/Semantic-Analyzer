@@ -1,5 +1,9 @@
 package me.khudyakov.staticanalyzer.entity.syntaxtree.expression;
 
+import me.khudyakov.staticanalyzer.util.ExpressionExecutionException;
+
+import java.util.Objects;
+
 public class Variable extends Expression {
 
     public final String name;
@@ -15,7 +19,10 @@ public class Variable extends Expression {
     }
 
     @Override
-    public int execute() {
+    public int execute() throws ExpressionExecutionException {
+        if(value == null) {
+            throw new ExpressionExecutionException(String.format("Variable %s is not defined", name));
+        }
         return value;
     }
 
@@ -29,6 +36,20 @@ public class Variable extends Expression {
 
     public void setValue(Integer value) {
         this.value = value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Variable variable = (Variable) o;
+        return name.equals(variable.name) &&
+                Objects.equals(value, variable.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, value);
     }
 
     @Override

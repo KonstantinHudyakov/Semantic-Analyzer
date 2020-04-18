@@ -3,8 +3,8 @@ package me.khudyakov.staticanalyzer.service;
 import me.khudyakov.staticanalyzer.editor.EditorGUI;
 import me.khudyakov.staticanalyzer.editor.OutputAreaWriter;
 import me.khudyakov.staticanalyzer.entity.syntaxtree.SyntaxTree;
-import me.khudyakov.staticanalyzer.program.Program;
-import me.khudyakov.staticanalyzer.program.ProgramCode;
+import me.khudyakov.staticanalyzer.entity.Program;
+import me.khudyakov.staticanalyzer.entity.ProgramCode;
 import me.khudyakov.staticanalyzer.util.SyntaxAnalyzerException;
 import org.junit.jupiter.api.Test;
 

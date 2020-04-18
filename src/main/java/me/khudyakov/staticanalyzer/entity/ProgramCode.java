@@ -1,6 +1,4 @@
-package me.khudyakov.staticanalyzer.program;
-
-import me.khudyakov.staticanalyzer.entity.Token;
+package me.khudyakov.staticanalyzer.entity;
 
 import java.util.List;
 

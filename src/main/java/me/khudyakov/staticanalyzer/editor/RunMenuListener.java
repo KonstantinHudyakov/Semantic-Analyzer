@@ -1,8 +1,8 @@
 package me.khudyakov.staticanalyzer.editor;
 
-import me.khudyakov.staticanalyzer.program.Program;
-import me.khudyakov.staticanalyzer.program.ProgramCode;
-import me.khudyakov.staticanalyzer.program.SyntaxTree;
+import me.khudyakov.staticanalyzer.entity.Program;
+import me.khudyakov.staticanalyzer.entity.ProgramCode;
+import me.khudyakov.staticanalyzer.entity.syntaxtree.SyntaxTree;
 import me.khudyakov.staticanalyzer.service.CodeParser;
 import me.khudyakov.staticanalyzer.service.SyntaxAnalyzer;
 
@@ -30,7 +30,7 @@ public class RunMenuListener implements MenuListener {
         String text = getText();
         try {
             ProgramCode programCode = codeParser.parse(text);
-            SyntaxTree syntaxTree = syntaxAnalyzer.analyze(programCode);
+            SyntaxTree syntaxTree = syntaxAnalyzer.createSyntaxTree(programCode);
             Program program = new Program(programCode, syntaxTree);
 
             program.execute();

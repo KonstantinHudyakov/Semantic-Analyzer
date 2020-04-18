@@ -1,4 +1,4 @@
-package me.khudyakov.staticanalyzer.program;
+package me.khudyakov.staticanalyzer.entity;
 
 import me.khudyakov.staticanalyzer.entity.syntaxtree.SyntaxTree;
 

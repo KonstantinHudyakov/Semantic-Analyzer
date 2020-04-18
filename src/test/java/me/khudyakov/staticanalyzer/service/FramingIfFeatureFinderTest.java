@@ -1,7 +1,5 @@
 package me.khudyakov.staticanalyzer.service;
 
-import me.khudyakov.staticanalyzer.util.ExpressionConverterException;
-import me.khudyakov.staticanalyzer.util.ExpressionExecutionException;
 import me.khudyakov.staticanalyzer.util.SyntaxAnalyzerException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +19,7 @@ class FramingIfFeatureFinderTest {
     }
 
     @Test
-    void catchFramingIf() throws ExpressionConverterException, ExpressionExecutionException, SyntaxAnalyzerException, ParseException {
+    void catchFramingIf() throws SyntaxAnalyzerException, ParseException {
         String text1 = "3 * 7;";
         String text2 = "if() 3 * 7;";
         String text3 = "if() { 3 * 7; }";
@@ -36,7 +34,7 @@ class FramingIfFeatureFinderTest {
     }
 
     @Test
-    void catchAfterRemoving() throws ExpressionConverterException, ExpressionExecutionException, SyntaxAnalyzerException, ParseException {
+    void catchAfterRemoving() throws SyntaxAnalyzerException, ParseException {
         String text1 = "if() { 3 * 7; }";
         String text2 = "if() 3 * 7;";
         String text3 = "3 * 7;";
@@ -46,7 +44,7 @@ class FramingIfFeatureFinderTest {
     }
 
     @Test
-    void catchWithMisprint() throws ExpressionConverterException, ExpressionExecutionException, SyntaxAnalyzerException, ParseException {
+    void catchWithMisprint() throws SyntaxAnalyzerException, ParseException {
         String text1 = "3 * 7; @x = 44;";
         String text2 = "if() 3 * 7; @x = 44;";
         String text3 = "if() [ 3 * 7; @x = 44;";
@@ -64,17 +62,17 @@ class FramingIfFeatureFinderTest {
     }
 
     @Test
-    void dontCatchEmptyBlock() throws ExpressionConverterException, ExpressionExecutionException, SyntaxAnalyzerException, ParseException {
-        String text1 = "3 * 7;";
-        String text2 = "if() 3 * 7;";
-        String text3 = "if() {} 3 * 7;";
+    void catchFramingBlockAndStatement() throws SyntaxAnalyzerException, ParseException {
+        String text1 = "@x = 5; {4 * 7; } @y = 3;";
+        String text2 = "@x = 5; if() {4 * 7; } @y = 3;";
+        String text3 = "@x = 5; if() { {4 * 7; } @y = 3; }";
 
         addChangeSequence(cache, text1, text2, text3);
-        assertFalse(framingIfFinder.featureFound(cache));
+        assertTrue(framingIfFinder.featureFound(cache));
     }
 
     @Test
-    void dontCatchInsertBlock() throws ExpressionConverterException, ExpressionExecutionException, SyntaxAnalyzerException, ParseException {
+    void dontCatchInsertBlock() throws SyntaxAnalyzerException, ParseException {
         String text1 = "if() 3 * 7;";
         String text2 = "if() { 3 * 7; }";
 
@@ -83,7 +81,7 @@ class FramingIfFeatureFinderTest {
     }
 
     @Test
-    void dontCatchEditingAfterIf() throws ExpressionConverterException, ExpressionExecutionException, SyntaxAnalyzerException, ParseException {
+    void dontCatchEditingAfterIf() throws SyntaxAnalyzerException, ParseException {
         String text1 = "@x = 35; 3 * 7;";
         String text2 = "@x = 35; if() 3 * 7;";
         String text3 = "@x = 35; if() 3 * 7 + 4;";
@@ -93,4 +91,42 @@ class FramingIfFeatureFinderTest {
         assertFalse(framingIfFinder.featureFound(cache));
     }
 
+    @Test
+    void dontCatchInsertIfToBlock() throws SyntaxAnalyzerException, ParseException {
+        String text1 = "@x = 3; { x * 5; }";
+        String text2 = "@x = 3; if(1) { x * 5; }";
+
+        addChangeSequence(cache, text1, text2);
+        assertFalse(framingIfFinder.featureFound(cache));
+    }
+
+    @Test
+    void dontCatchFramingNothing() throws SyntaxAnalyzerException, ParseException {
+        String text1 = "3 * 7;";
+        String text2 = "if() 3 * 7;";
+        String text3 = "if() {} 3 * 7;";
+
+        addChangeSequence(cache, text1, text2, text3);
+        assertFalse(framingIfFinder.featureFound(cache));
+    }
+
+    @Test
+    void dontCatchFramingEmptyBlock() throws SyntaxAnalyzerException, ParseException {
+        String text1 = "@y = 3; { } (y - 5) * 3;";
+        String text2 = "@y = 3; if(abc) { } (y - 5) * 3;";
+        String text3 = "@y = 3; if(abc) { { } } (y - 5) * 3;";
+
+        addChangeSequence(cache, text1, text2, text3);
+        assertFalse(framingIfFinder.featureFound(cache));
+    }
+
+    @Test
+    void dontCatchFramingNotEmptyBlock() throws SyntaxAnalyzerException, ParseException {
+        String text1 = "{ @x = 33; 3 * x; @y = x + 10; }";
+        String text2 = "if() { @x = 33; 3 * x; @y = x + 10; }";
+        String text3 = "if() { { @x = 33; 3 * x; @y = x + 10; } }";
+
+        addChangeSequence(cache, text1, text2, text3);
+        assertFalse(framingIfFinder.featureFound(cache));
+    }
 }

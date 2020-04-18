@@ -1,5 +1,6 @@
 package me.khudyakov.staticanalyzer.entity.syntaxtree.statement;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -15,6 +16,11 @@ public class BlockStatement extends Statement {
     @Override
     public void execute() {
         statements.forEach(Statement::execute);
+    }
+
+    @Override
+    public List<? extends Statement> getChildren() {
+        return Collections.unmodifiableList(statements);
     }
 
     public int size() {

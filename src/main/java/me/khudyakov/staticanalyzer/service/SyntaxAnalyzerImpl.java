@@ -9,7 +9,7 @@ import me.khudyakov.staticanalyzer.entity.syntaxtree.expression.Expression;
 import me.khudyakov.staticanalyzer.entity.syntaxtree.expression.Variable;
 import me.khudyakov.staticanalyzer.entity.syntaxtree.expression.operator.*;
 import me.khudyakov.staticanalyzer.entity.syntaxtree.statement.*;
-import me.khudyakov.staticanalyzer.program.ProgramCode;
+import me.khudyakov.staticanalyzer.entity.ProgramCode;
 import me.khudyakov.staticanalyzer.util.SyntaxAnalyzerException;
 import me.khudyakov.staticanalyzer.util.TokenUtils;
 
@@ -52,6 +52,10 @@ public class SyntaxAnalyzerImpl implements SyntaxAnalyzer {
             return new SyntaxTree(blockStatement);
         }
 
+        /**
+         * Program -> StatementList
+         * StatementList -> empty | StatementList Statement
+         */
         private List<Statement> statementList() throws SyntaxAnalyzerException {
             List<Statement> statements = new ArrayList<>();
             while (curInd < code.size()) {
@@ -60,6 +64,9 @@ public class SyntaxAnalyzerImpl implements SyntaxAnalyzer {
             return statements;
         }
 
+        /**
+         * Statement -> ExpressionStatement | IfStatement | AssignStatement | BlockStatement
+         */
         private Statement statement() throws SyntaxAnalyzerException {
             Token token = getCurOrThrow();
             Statement statement = null;
@@ -77,6 +84,9 @@ public class SyntaxAnalyzerImpl implements SyntaxAnalyzer {
             return statement;
         }
 
+        /**
+         * BlockStatement -> { StatementList }
+         */
         private BlockStatement blockStatement() throws SyntaxAnalyzerException {
             int startInd = curInd;
             checkTypeOfCurOrThrow(OPEN_BRACE);
@@ -89,11 +99,14 @@ public class SyntaxAnalyzerImpl implements SyntaxAnalyzer {
             return new BlockStatement(statementList, startInd, curInd - 1);
         }
 
+        /**
+         * IfStatement -> if ( Expression ) Statement
+         */
         private IfStatement ifStatement() throws SyntaxAnalyzerException {
             int startInd = curInd;
             checkTypeOfCurOrThrow(IF);
             checkTypeOfCurOrThrow(OPEN_PARENTHESIS);
-            Expression condition = expression();
+            Expression condition = checkTypeOfCur(CLOSE_PARENTHESIS) ? Expression.EMPTY_EXPRESSION : expression();
             checkTypeOfCurOrThrow(CLOSE_PARENTHESIS);
             int endInd = curInd - 1;
             Statement body = statement();
@@ -101,6 +114,9 @@ public class SyntaxAnalyzerImpl implements SyntaxAnalyzer {
             return new IfStatement(condition, body, startInd, endInd);
         }
 
+        /**
+         * AssignStatement -> @ Identifier = Expression ;
+         */
         private AssignStatement assignStatement() throws SyntaxAnalyzerException {
             int startInd = curInd;
             checkTypeOfCurOrThrow(ASSIGN_IDENTIFIER);
@@ -112,6 +128,9 @@ public class SyntaxAnalyzerImpl implements SyntaxAnalyzer {
             return new AssignStatement(variable, expr, startInd, curInd - 1);
         }
 
+        /**
+         * ExpressionStatement -> Expression ;
+         */
         private ExpressionStatement expressionStatement() throws SyntaxAnalyzerException {
             int startInd = curInd;
             Expression expr = expression();
@@ -126,16 +145,16 @@ public class SyntaxAnalyzerImpl implements SyntaxAnalyzer {
          * PlusMinusExpr -> MultDivExpr | PlusMinusExpr + MultDivExpr | PlusMinusExpr - MultDivExpr
          * MultDivExpr -> SimpleExpr | MultDivExpr * SimpleExpr | MultDivExpr / SimpleExpr
          * SimpleExpression -> Identifier | Integer | ( Expression )
-         *
+         * <p>
          * Избавимся от левой рекурсии:
-         *
+         * <p>
          * Expression -> PlusMinusExpr | PlusMinusExpr > PlusMinusExpr | PlusMinusExpr < PlusMinusExpr
          * PlusMinusExpr -> MultDivExpr | MultDivExpr + PlusMinusExpr2 | MultDivExpr - PlusMinusExpr2
          * PlusMinusExpr2 -> MultDivExpr | MultDivExpr + PlusMinusExpr2 | MultDivExpr - PlusMinusExpr2
          * MultDivExpr -> SimpleExpr | SimpleExpr * MultDivExpr2 | SimpleExpr / MultDivExpr2
          * MultDivExpr2 -> SimpleExpr | SimpleExpr * MultDivExpr2 | SimpleExpr / MultDivExpr2
          * SimpleExpression -> Identifier | Integer | ( Expression )
-         *
+         * <p>
          * Заменим левую рекурсию на цикл
          */
         private Expression expression() throws SyntaxAnalyzerException {

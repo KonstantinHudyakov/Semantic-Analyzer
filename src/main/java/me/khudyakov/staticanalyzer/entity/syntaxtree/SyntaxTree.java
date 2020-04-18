@@ -4,13 +4,15 @@ import me.khudyakov.staticanalyzer.entity.syntaxtree.statement.BlockStatement;
 import me.khudyakov.staticanalyzer.entity.syntaxtree.statement.IfStatement;
 import me.khudyakov.staticanalyzer.entity.syntaxtree.statement.Statement;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 public class SyntaxTree {
 
-    private final BlockStatement root;
+    public static final SyntaxTree EMPTY_TREE = new SyntaxTree(new BlockStatement(new ArrayList<>(), 0, -1));
 
+    private final BlockStatement root;
     private final List<Statement> dfsOrder;
 
         public SyntaxTree(BlockStatement root) {

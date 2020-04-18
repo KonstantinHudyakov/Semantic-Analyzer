@@ -1,9 +1,7 @@
 package me.khudyakov.staticanalyzer.service;
 
-import me.khudyakov.staticanalyzer.program.ProgramCode;
-import me.khudyakov.staticanalyzer.program.SyntaxTree;
-import me.khudyakov.staticanalyzer.util.ExpressionConverterException;
-import me.khudyakov.staticanalyzer.util.ExpressionExecutionException;
+import me.khudyakov.staticanalyzer.entity.syntaxtree.SyntaxTree;
+import me.khudyakov.staticanalyzer.entity.ProgramCode;
 import me.khudyakov.staticanalyzer.util.SyntaxAnalyzerException;
 
 import java.text.ParseException;
@@ -11,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ServiceUtils {
 
@@ -19,19 +17,19 @@ public class ServiceUtils {
     static final SyntaxAnalyzer syntaxAnalyzer = new SyntaxAnalyzerImpl();
     static final FeatureFinder framingIfFinder = new FramingIfFeatureFinder();
 
-    static SyntaxTree parseAndAnalyze(String code) throws ExpressionConverterException, ExpressionExecutionException, SyntaxAnalyzerException, ParseException {
+    static SyntaxTree parseAndAnalyze(String code) throws SyntaxAnalyzerException, ParseException {
         ProgramCode programCode = codeParser.parse(code);
-        return syntaxAnalyzer.analyze(programCode);
+        return syntaxAnalyzer.createSyntaxTree(programCode);
     }
 
-    static SyntaxTree addChange(SyntaxTreeChangesCache cache, String code) throws ParseException, ExpressionConverterException, ExpressionExecutionException, SyntaxAnalyzerException {
+    static SyntaxTree addChange(SyntaxTreeChangesCache cache, String code) throws ParseException, SyntaxAnalyzerException {
         SyntaxTree syntaxTree = parseAndAnalyze(code);
         cache.addNewChange(syntaxTree);
 
         return syntaxTree;
     }
 
-    static List<SyntaxTree> addChangeSequence(SyntaxTreeChangesCache cache, String... codes) throws ExpressionConverterException, ExpressionExecutionException, SyntaxAnalyzerException, ParseException {
+    static List<SyntaxTree> addChangeSequence(SyntaxTreeChangesCache cache, String... codes) throws SyntaxAnalyzerException, ParseException {
         List<SyntaxTree> list = new ArrayList<>();
         for(String code : codes) {
             list.add(addChange(cache, code));
@@ -40,7 +38,7 @@ public class ServiceUtils {
         return list;
     }
 
-    static void analyzeOrThrow(String... codes) throws ExpressionConverterException, ExpressionExecutionException, SyntaxAnalyzerException, ParseException {
+    static void analyzeOrThrow(String... codes) throws SyntaxAnalyzerException, ParseException {
         for (String code : codes) {
             parseAndAnalyze(code);
         }

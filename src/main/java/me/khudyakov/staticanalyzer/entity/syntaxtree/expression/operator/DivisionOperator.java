@@ -6,4 +6,9 @@ public class DivisionOperator implements BinaryOperator {
     public int applyAsInt(Integer integer, Integer integer2) {
         return integer / integer2;
     }
+
+    @Override
+    public String toString() {
+        return "/";
+    }
 }

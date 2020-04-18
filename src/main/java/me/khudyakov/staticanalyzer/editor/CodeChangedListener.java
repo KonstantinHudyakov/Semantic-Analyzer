@@ -1,8 +1,8 @@
 package me.khudyakov.staticanalyzer.editor;
 
-import me.khudyakov.staticanalyzer.program.Program;
-import me.khudyakov.staticanalyzer.program.ProgramCode;
-import me.khudyakov.staticanalyzer.program.SyntaxTree;
+import me.khudyakov.staticanalyzer.entity.Program;
+import me.khudyakov.staticanalyzer.entity.ProgramCode;
+import me.khudyakov.staticanalyzer.entity.syntaxtree.SyntaxTree;
 import me.khudyakov.staticanalyzer.service.CodeParser;
 import me.khudyakov.staticanalyzer.service.FeatureFinder;
 import me.khudyakov.staticanalyzer.service.SyntaxAnalyzer;
@@ -70,7 +70,7 @@ public class CodeChangedListener implements DocumentListener {
     private Program parseAndAnalyzeProgram() throws Exception {
         String text = getText();
         ProgramCode programCode = codeParser.parse(text);
-        SyntaxTree syntaxTree = syntaxAnalyzer.analyze(programCode);
+        SyntaxTree syntaxTree = syntaxAnalyzer.createSyntaxTree(programCode);
 
         return new Program(programCode, syntaxTree);
     }

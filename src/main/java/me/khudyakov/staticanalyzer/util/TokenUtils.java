@@ -19,6 +19,7 @@ public class TokenUtils {
         return type == OPEN_BRACE
                 || type == IF
                 || type == ASSIGN_IDENTIFIER
+                || type == COMMENT
                 || isExprStart(token);
     }
 

@@ -63,4 +63,16 @@ class SyntaxAnalyzerTest {
 
         analyzeOrThrow(text1, text2, text3, text4, text5, text6);
     }
+
+    @Test
+    void testComments() throws SyntaxAnalyzerException, ParseException {
+        String inputProgram = "@x = 3; //  sdfdf 2342424\n" +
+                "//5 * 2 - 3;\n" +
+                "3 * 2;//\n" +
+                "{ @y = 6 + x;//@zer= y/x;\n" +
+                "}\n" +
+                "//end program comment";
+
+        analyzeOrThrow(inputProgram);
+    }
 }

@@ -78,6 +78,8 @@ public class SyntaxAnalyzerImpl implements SyntaxAnalyzer {
                 statement = blockStatement();
             } else if (isExprStart(token)) {
                 statement = expressionStatement();
+            } else if(isTokenOfType(token, COMMENT)) {
+                statement = commentStatement();
             } else {
                 throwError(token);
             }
@@ -137,6 +139,21 @@ public class SyntaxAnalyzerImpl implements SyntaxAnalyzer {
             checkTypeOfCurOrThrow(SEMICOLON);
 
             return new ExpressionStatement(expr, startInd, curInd - 1);
+        }
+
+        private CommentStatement commentStatement() throws SyntaxAnalyzerException {
+            Token cur = getCurOrThrow();
+            CommentStatement statement = null;
+            if(isTokenOfType(cur, COMMENT)) {
+                // skip first two slashes
+                String commentValue = cur.getValue().substring(2);
+                statement = new CommentStatement(commentValue, curInd, curInd);
+                curInd++;
+            } else {
+                throwError(cur);
+            }
+
+            return statement;
         }
 
         /**

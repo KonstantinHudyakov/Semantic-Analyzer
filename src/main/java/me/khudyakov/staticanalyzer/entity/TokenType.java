@@ -6,7 +6,7 @@ public enum TokenType {
     ASSIGN_IDENTIFIER("ASSIGN_IDENTIFIER"), // @
     ASSIGN("ASSIGN"), // =
 
-    // delimiters
+    // special symbols
     OPEN_PARENTHESIS("OPEN_PARENTHESIS"),
     CLOSE_PARENTHESIS("CLOSE_PARENTHESIS"),
     OPEN_BRACE("OPEN_BRACE"),
@@ -23,7 +23,9 @@ public enum TokenType {
 
     // atoms
     INTEGER("INTEGER"),
-    IDENTIFIER("IDENTIFIER");
+    IDENTIFIER("IDENTIFIER"),
+
+    COMMENT("COMMENT");
 
 
     private final String value;

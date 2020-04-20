@@ -13,129 +13,152 @@ public class CodeParserImpl implements CodeParser {
 
     public ProgramCode parse(String text) throws ParseException {
         List<Token> code = new ArrayList<>();
-        text = text.trim().replaceAll("[\r\n\t]+", " ");
-        String[] words = text.split(" +");
-        for (String word : words) {
-            code.addAll(parseTokens(word));
-        }
-        return new ProgramCode(code);
-    }
-
-    private List<Token> parseTokens(String word) throws ParseException {
-        List<Token> code = new ArrayList<>();
-        char[] arr = word.toCharArray();
-        int n = word.length();
+        char[] arr = text.toCharArray();
         Token token;
-        for (int i = 0; i < n; i++) {
-            switch (arr[i]) {
+        int curInd = skipDelimiters(text, 0);
+        while (curInd < text.length()) {
+            switch (arr[curInd]) {
                 case '@': {
-                    token = new Token("@", ASSIGN_IDENTIFIER);
+                    token = new Token("@", ASSIGN_IDENTIFIER, curInd);
                     break;
                 }
                 case '=': {
-                    token = new Token("=", ASSIGN);
+                    token = new Token("=", ASSIGN, curInd);
                     break;
                 }
                 case ';': {
-                    token = new Token(";", SEMICOLON);
+                    token = new Token(";", SEMICOLON, curInd);
                     break;
                 }
                 case '(': {
-                    token = new Token("(", OPEN_PARENTHESIS);
+                    token = new Token("(", OPEN_PARENTHESIS, curInd);
                     break;
                 }
                 case ')': {
-                    token = new Token(")", CLOSE_PARENTHESIS);
+                    token = new Token(")", CLOSE_PARENTHESIS, curInd);
                     break;
                 }
                 case '{': {
-                    token = new Token("{", OPEN_BRACE);
+                    token = new Token("{", OPEN_BRACE, curInd);
                     break;
                 }
                 case '}': {
-                    token = new Token("}", CLOSE_BRACE);
+                    token = new Token("}", CLOSE_BRACE, curInd);
                     break;
                 }
                 case '+': {
-                    if(i + 1 < n && Character.isDigit(arr[i + 1])) {
+                    if(curInd + 1 < text.length() && Character.isDigit(arr[curInd + 1])) {
                         // it is integer with sign +
-                        token = readInteger(word, i);
-                        i += token.getValue().length() - 1;
+                        token = readInteger(text, curInd);
+                        curInd += token.getValue().length() - 1;
                     } else {
-                        token = new Token("+", ADDITION);
+                        token = new Token("+", ADDITION, curInd);
                     }
                     break;
                 }
                 case '-': {
-                    if(i + 1 < n && Character.isDigit(arr[i + 1])) {
+                    if(curInd + 1 < text.length() && Character.isDigit(arr[curInd + 1])) {
                         // it is integer with sign -
-                        token = readInteger(word, i);
-                        i += token.getValue().length() - 1;
+                        token = readInteger(text, curInd);
+                        curInd += token.getValue().length() - 1;
                     } else {
-                        token = new Token("-", SUBTRACTION);
+                        token = new Token("-", SUBTRACTION, curInd);
                     }
                     break;
                 }
                 case '*': {
-                    token = new Token("*", MULTIPLICATION);
+                    token = new Token("*", MULTIPLICATION, curInd);
                     break;
                 }
                 case '/': {
-                    token = new Token("/", DIVISION);
+                    if(curInd + 1 < text.length() && arr[curInd + 1] == '/') {
+                        // it is a comment
+                        token = readComment(text, curInd);
+                        curInd += token.getValue().length() - 1;
+                    } else {
+                        token = new Token("/", DIVISION, curInd);
+                    }
                     break;
                 }
                 case '>': {
-                    token = new Token(">", GREATER);
+                    token = new Token(">", GREATER, curInd);
                     break;
                 }
                 case '<': {
-                    token = new Token("<", LESS);
+                    token = new Token("<", LESS, curInd);
                     break;
                 }
                 default: {
-                    if (Character.isDigit(arr[i])) {
-                        token = readInteger(word, i);
-                    } else if (Character.isLetter(arr[i])) {
-                        token = readIdentifier(word, i);
+                    if (Character.isDigit(arr[curInd])) {
+                        token = readInteger(text, curInd);
+                    } else if (Character.isLetter(arr[curInd])) {
+                        token = readIdentifier(text, curInd);
                         if("if".equals(token.getValue())) {
-                            token = new Token("if", IF);
+                            token = new Token("if", IF, curInd);
                         }
                     } else {
-                        throw new ParseException(String.format("Некорректный символ '%s' в выражении \"%s\"", arr[i], word), i);
+                        throw new ParseException(String.format("Некорректный символ '%s' в выражении \"%s\"", arr[curInd], text), curInd);
                     }
-                    i += token.getValue().length() - 1;
+                    curInd += token.getValue().length() - 1;
                 }
             }
             code.add(token);
+            curInd = skipDelimiters(text, curInd + 1);
         }
-        return code;
+
+        return new ProgramCode(code);
     }
 
-    private Token readInteger(String word, int fromInd) throws ParseException {
+    private Token readInteger(String text, int fromInd) throws ParseException {
         StringBuilder intBuilder = new StringBuilder();
-        if(word.charAt(fromInd) == '-') {
+        int curInd = fromInd;
+        if(text.charAt(curInd) == '-') {
             intBuilder.append('-');
-            fromInd++;
-        } else if(word.charAt(fromInd) == '+') {
-            fromInd++;
+            curInd++;
+        } else if(text.charAt(curInd) == '+') {
+            curInd++;
         }
-        for(int i = fromInd; i < word.length() && Character.isDigit(word.charAt(i)); i++) {
-            intBuilder.append(word.charAt(i));
+        while (curInd < text.length() && Character.isDigit(text.charAt(curInd))) {
+            intBuilder.append(text.charAt(curInd));
+            curInd++;
         }
         try {
             // check that value belongs to the Integer interval
             int constant = Integer.parseInt(intBuilder.toString());
-            return new Token(String.valueOf(constant), INTEGER);
+            return new Token(String.valueOf(constant), INTEGER, fromInd);
         } catch (NumberFormatException ex) {
             throw new ParseException("Numerical value is out of range for type Integer, value = " + intBuilder.toString(), fromInd);
         }
     }
 
-    private Token readIdentifier(String word, int fromInd) {
+    private Token readIdentifier(String text, int fromInd) {
         StringBuilder idBuilder = new StringBuilder();
-        for(int i = fromInd; i < word.length() && Character.isLetter(word.charAt(i)); i++) {
-            idBuilder.append(word.charAt(i));
+        int curInd = fromInd;
+        while (curInd < text.length() && Character.isLetter(text.charAt(curInd))) {
+            idBuilder.append(text.charAt(curInd));
+            curInd++;
         }
-        return new Token(idBuilder.toString(), IDENTIFIER);
+        return new Token(idBuilder.toString(), IDENTIFIER, fromInd);
+    }
+
+    private Token readComment(String text, int fromInd) {
+        StringBuilder commentBuilder = new StringBuilder();
+        int curInd = fromInd;
+        while(curInd < text.length() && text.charAt(curInd) != '\n') {
+            commentBuilder.append(text.charAt(curInd));
+            curInd++;
+        }
+        return new Token(commentBuilder.toString(), COMMENT, fromInd);
+    }
+
+    private int skipDelimiters(String text, int fromInd) {
+        while(fromInd < text.length() && isDelimiter(text.charAt(fromInd))) {
+            fromInd++;
+        }
+        return fromInd;
+    }
+
+    private boolean isDelimiter(char ch) {
+        return ch == ' ' || ch == '\n' || ch == '\r' || ch == '\t';
     }
 }

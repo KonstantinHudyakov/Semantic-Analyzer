@@ -140,13 +140,13 @@ public class SyntaxAnalyzerImpl implements SyntaxAnalyzer {
         }
 
         /**
-         * Заданная грамматика для арифметических выражений:
+         * Grammar for arithmetic expressions:
          * Expression -> PlusMinusExpr | PlusMinusExpr > PlusMinusExpr | PlusMinusExpr < PlusMinusExpr
          * PlusMinusExpr -> MultDivExpr | PlusMinusExpr + MultDivExpr | PlusMinusExpr - MultDivExpr
          * MultDivExpr -> SimpleExpr | MultDivExpr * SimpleExpr | MultDivExpr / SimpleExpr
          * SimpleExpression -> Identifier | Integer | ( Expression )
          * <p>
-         * Избавимся от левой рекурсии:
+         * Replace left recursion:
          * <p>
          * Expression -> PlusMinusExpr | PlusMinusExpr > PlusMinusExpr | PlusMinusExpr < PlusMinusExpr
          * PlusMinusExpr -> MultDivExpr | MultDivExpr + PlusMinusExpr2 | MultDivExpr - PlusMinusExpr2
@@ -155,7 +155,7 @@ public class SyntaxAnalyzerImpl implements SyntaxAnalyzer {
          * MultDivExpr2 -> SimpleExpr | SimpleExpr * MultDivExpr2 | SimpleExpr / MultDivExpr2
          * SimpleExpression -> Identifier | Integer | ( Expression )
          * <p>
-         * Заменим левую рекурсию на цикл
+         * Left recursion will be replaces with cycle
          */
         private Expression expression() throws SyntaxAnalyzerException {
             Expression leftExpr = plusMinusExpression();

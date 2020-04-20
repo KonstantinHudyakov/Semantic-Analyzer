@@ -39,4 +39,18 @@ class CodeParserTest {
         ProgramCode result = codeParser.parse(inputProgram);
         assertEquals(expectedResult, result.toString());
     }
+
+    @Test
+    void parseComments() throws ParseException {
+        String inputProgram = "@x = 3; //  sdfdf 2342424\n" +
+                "//5 * 2 - 3;\n" +
+                "3 * 2;//\n" +
+                "{ @y = 6 + x;//@zer= y/x;\n" +
+                "}\n" +
+                "//end program comment";
+        String expectedResult = "[@, x, =, 3, ;, //  sdfdf 2342424, //5 * 2 - 3;, 3, *, 2, ;, //, {, @, y, =, 6, +, x, ;, //@zer= y/x;, }, //end program comment]";
+
+        ProgramCode result = codeParser.parse(inputProgram);
+        assertEquals(expectedResult, result.toString());
+    }
 }

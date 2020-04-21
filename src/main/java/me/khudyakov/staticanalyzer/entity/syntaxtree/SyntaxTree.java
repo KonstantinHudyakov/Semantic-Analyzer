@@ -15,7 +15,7 @@ public class SyntaxTree {
     private final BlockStatement root;
     private final List<Statement> dfsOrder;
 
-        public SyntaxTree(BlockStatement root) {
+    public SyntaxTree(BlockStatement root) {
         this.root = root;
         dfsOrder = new LinkedList<>();
         // adding dummy node to link it with first node

@@ -50,7 +50,7 @@ public abstract class Statement {
                 && endInd == statement.getEndInd();
     }
 
-    public boolean equals(Object obj) { // this inspection does not fit the current context.
+    public boolean equals(Object obj) {
         if (this == obj) return true;
         if(obj instanceof Statement) {
             Statement statement = (Statement) obj;

@@ -17,7 +17,7 @@ public class EditorGUI extends JFrame {
     private final CodeParser codeParser = new CodeParserImpl();
     private final SyntaxAnalyzer syntaxAnalyzer = new SyntaxAnalyzerImpl();
     private final SyntaxTreeCache syntaxTreeCache = new SyntaxTreeCache(3);
-    private final FeatureFinder framingIfFinder = new FramingIfTwoStepFinder();
+    private final FeatureFinder framingIfFinder = new FramingIfFinder();
 
     private final JTextArea codeArea;
 

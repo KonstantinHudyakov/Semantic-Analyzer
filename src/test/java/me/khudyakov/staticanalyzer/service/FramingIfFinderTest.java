@@ -9,13 +9,13 @@ import java.text.ParseException;
 import static me.khudyakov.staticanalyzer.service.ServiceUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-class FramingIfFeatureFinderTest {
+class FramingIfFinderTest {
 
-    private SyntaxTreeChangesCache cache;
+    private SyntaxTreeCache cache;
 
     @BeforeEach
     private void tearUp() {
-        cache = new SyntaxTreeChangesCache(3);
+        cache = new SyntaxTreeCache(3);
     }
 
     @Test
@@ -30,6 +30,16 @@ class FramingIfFeatureFinderTest {
         assertTrue(framingIfFinder.featureFound(cache));
 
         addChangeSequence(cache, text4, text5);
+        assertTrue(framingIfFinder.featureFound(cache));
+    }
+
+    @Test
+    void catchFramingIfInBlock() throws SyntaxAnalyzerException, ParseException {
+        String text1 = "1; if(3 > 2) { @x = 3; 3 * 7; }";
+        String text2 = "1; if(3 > 2) { if(1) @x = 3; 3 * 7; }";
+        String text3 = "1; if(3 > 2) { if(1) { @x = 3; 3 * 7; } }";
+
+        addChangeSequence(cache, text1, text2, text3);
         assertTrue(framingIfFinder.featureFound(cache));
     }
 
@@ -121,10 +131,30 @@ class FramingIfFeatureFinderTest {
     }
 
     @Test
-    void dontCatchFramingNotEmptyBlock() throws SyntaxAnalyzerException, ParseException {
+    void dontCatchFramingFullBlock() throws SyntaxAnalyzerException, ParseException {
         String text1 = "{ @x = 33; 3 * x; @y = x + 10; }";
         String text2 = "if() { @x = 33; 3 * x; @y = x + 10; }";
         String text3 = "if() { { @x = 33; 3 * x; @y = x + 10; } }";
+
+        addChangeSequence(cache, text1, text2, text3);
+        assertFalse(framingIfFinder.featureFound(cache));
+    }
+
+    @Test
+    void dontCatchInsertingEmptyBlock() throws SyntaxAnalyzerException, ParseException {
+        String text1 = "@x = 3; { 3 * 3; 2 - 1; }";
+        String text2 = "@x = 3; if() { 3 * 3; 2 - 1; }";
+        String text3 = "@x = 3; if() {{} 3 * 3; 2 - 1; }";
+
+        addChangeSequence(cache, text1, text2, text3);
+        assertFalse(framingIfFinder.featureFound(cache));
+    }
+
+    @Test
+    void dontCatchInsertingBlockToBlock() throws SyntaxAnalyzerException, ParseException {
+        String text1 = "@x = 3; { 3 * 3; 2 - 1; }";
+        String text2 = "@x = 3; if() { 3 * 3; 2 - 1; }";
+        String text3 = "@x = 3; if() {{ 3 * 3; } 2 - 1; }";
 
         addChangeSequence(cache, text1, text2, text3);
         assertFalse(framingIfFinder.featureFound(cache));

@@ -15,18 +15,18 @@ public class SyntaxTree {
     private final BlockStatement root;
     private final List<Statement> dfsOrder;
 
-        public SyntaxTree(BlockStatement root) {
+    public SyntaxTree(BlockStatement root) {
         this.root = root;
         dfsOrder = new LinkedList<>();
         // adding dummy node to link it with first node
-        //dfsOrder.add(TreeNode.EMPTY_NODE);
+        dfsOrder.add(Statement.EMPTY_STATEMENT);
         traverseTree(root);
         // removing dummy node
-        //dfsOrder.remove(0);
+        dfsOrder.remove(0);
     }
 
     private void traverseTree(Statement root) {
-       // dfsOrder.get(dfsOrder.size() - 1).setNext(root);
+        dfsOrder.get(dfsOrder.size() - 1).setNext(root);
         dfsOrder.add(root);
         if(root instanceof BlockStatement) {
             BlockStatement node = (BlockStatement) root;

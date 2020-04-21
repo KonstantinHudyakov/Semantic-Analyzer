@@ -28,7 +28,7 @@ public class ExpressionStatement extends Statement {
 
     @Override
     public boolean contentEquals(Statement statement) {
-        return super.contentEquals(statement)
+        return getClass() == statement.getClass()
                 && expression.equals(((ExpressionStatement) statement).expression);
     }
 

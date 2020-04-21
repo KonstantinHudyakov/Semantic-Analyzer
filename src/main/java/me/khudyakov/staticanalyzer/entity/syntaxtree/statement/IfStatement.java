@@ -30,7 +30,7 @@ public class IfStatement extends Statement {
 
     @Override
     public boolean contentEquals(Statement statement) {
-        return super.contentEquals(statement)
+        return getClass() == statement.getClass()
                 && condition.equals(((IfStatement) statement).condition);
     }
 

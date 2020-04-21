@@ -25,6 +25,11 @@ public abstract class Statement {
     private final int startInd;
     private final int endInd;
 
+    /**
+     * Next node in SyntaxTree in DFS order
+     */
+    private Statement next;
+
     public Statement(int startInd, int endInd) {
         this.startInd = startInd;
         this.endInd = endInd;
@@ -34,16 +39,24 @@ public abstract class Statement {
 
     public abstract List<? extends Statement> getChildren();
 
-    /** Checks that statements are equal exclude their children
+    /** Checks that statement's contents are equal exclude their children
      * @param statement another Statement
-     * @return true if statement classes are equal and they have equal length and position (and content in concrete statements)
+     * @return true if statement classes are equal and they have equal content
      */
-    public boolean contentEquals(Statement statement) { // this inspection does not fit the current context.
-        if (this == statement) return true;
-        return statement != null
-                && getClass() == statement.getClass()
-                && getStartInd() == statement.getStartInd()
-                && getEndInd() == statement.getEndInd();
+    public abstract boolean contentEquals(Statement statement);
+
+    public boolean rangeEquals(Statement statement) {
+        return startInd == statement.getStartInd()
+                && endInd == statement.getEndInd();
+    }
+
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if(obj instanceof Statement) {
+            Statement statement = (Statement) obj;
+            return rangeEquals(statement) && contentEquals(statement);
+        }
+        return false;
     }
 
     public int getStartInd() {
@@ -52,5 +65,13 @@ public abstract class Statement {
 
     public int getEndInd() {
         return endInd;
+    }
+
+    public Statement next() {
+        return next;
+    }
+
+    public void setNext(Statement next) {
+        this.next = next;
     }
 }

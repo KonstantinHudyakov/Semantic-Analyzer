@@ -10,8 +10,8 @@ import me.khudyakov.staticanalyzer.util.TreeUtils;
 public class FramingIfTwoStepFinder implements FramingIfFinder {
 
     @Override
-    public boolean featureFound(SyntaxTreeChangesCache cache) {
-        if(cache.treeVersionsSize() < 3) {
+    public boolean featureFound(SyntaxTreeCache cache) {
+        if(cache.size() < 3) {
             return false;
         }
         SyntaxTree curTree = cache.getLastSyntaxTree();

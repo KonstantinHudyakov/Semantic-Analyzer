@@ -6,7 +6,7 @@ import me.khudyakov.staticanalyzer.entity.syntaxtree.SyntaxTree;
 import me.khudyakov.staticanalyzer.service.CodeParser;
 import me.khudyakov.staticanalyzer.service.FeatureFinder;
 import me.khudyakov.staticanalyzer.service.SyntaxAnalyzer;
-import me.khudyakov.staticanalyzer.service.SyntaxTreeChangesCache;
+import me.khudyakov.staticanalyzer.service.SyntaxTreeCache;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -22,16 +22,16 @@ public class CodeChangedListener implements DocumentListener {
 
     private final CodeParser codeParser;
     private final SyntaxAnalyzer syntaxAnalyzer;
-    private final SyntaxTreeChangesCache syntaxTreeChangesCache;
+    private final SyntaxTreeCache syntaxTreeCache;
     private final FeatureFinder framingIfFinder;
 
     public CodeChangedListener(EditorGUI editorGUI, CodeParser codeParser, SyntaxAnalyzer syntaxAnalyzer,
-                               SyntaxTreeChangesCache syntaxTreeChangesCache,
+                               SyntaxTreeCache syntaxTreeCache,
                                FeatureFinder framingIfFinder) {
         this.editorGUI = editorGUI;
         this.codeParser = codeParser;
         this.syntaxAnalyzer = syntaxAnalyzer;
-        this.syntaxTreeChangesCache = syntaxTreeChangesCache;
+        this.syntaxTreeCache = syntaxTreeCache;
         this.framingIfFinder = framingIfFinder;
     }
 
@@ -39,8 +39,8 @@ public class CodeChangedListener implements DocumentListener {
     public void insertUpdate(DocumentEvent e) {
         try {
             Program program = parseAndAnalyzeProgram();
-            boolean isChanged = syntaxTreeChangesCache.addNewChange(program.getSyntaxTree());
-            if(isChanged && framingIfFinder.featureFound(syntaxTreeChangesCache)) {
+            boolean isChanged = syntaxTreeCache.addNewSyntaxTreeVersion(program.getSyntaxTree());
+            if(isChanged && framingIfFinder.featureFound(syntaxTreeCache)) {
                 JTextArea codeArea = editorGUI.getCodeArea();
                 Caret caret = codeArea.getCaret();
                 Point caretPos = caret.getMagicCaretPosition();
@@ -56,7 +56,7 @@ public class CodeChangedListener implements DocumentListener {
     public void removeUpdate(DocumentEvent e) {
         try {
             Program program = parseAndAnalyzeProgram();
-            syntaxTreeChangesCache.addNewChange(program.getSyntaxTree());
+            syntaxTreeCache.addNewSyntaxTreeVersion(program.getSyntaxTree());
         } catch (Exception ex) {
             // do nothing
         }

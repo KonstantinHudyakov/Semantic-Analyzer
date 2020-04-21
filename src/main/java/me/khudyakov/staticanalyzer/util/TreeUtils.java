@@ -11,10 +11,10 @@ public class TreeUtils {
 
     /**
      * Finds difference between two SyntaxTrees.
-     * Difference - first pair of nodes that not not equal via Statement's equals method
+     * Difference - first pair of nodes that not not equal via Statement's contentEquals method
      * @param prevTree one version of SyntaxTree
      * @param curTree another version of SyntaxTree
-     * @return pair of Statements from prevTree and curTree sequentially that not equal
+     * @return pair of Statements from prevTree and curTree sequentially that not contentEqual
      */
     public static Pair<Statement, Statement> findDiff(SyntaxTree prevTree, SyntaxTree curTree) {
         Stack<Statement> stCur = new Stack<>();

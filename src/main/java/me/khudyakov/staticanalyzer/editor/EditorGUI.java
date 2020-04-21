@@ -16,7 +16,7 @@ public class EditorGUI extends JFrame {
 
     private final CodeParser codeParser = new CodeParserImpl();
     private final SyntaxAnalyzer syntaxAnalyzer = new SyntaxAnalyzerImpl();
-    private final SyntaxTreeChangesCache syntaxTreeChangesCache = new SyntaxTreeChangesCache(3);
+    private final SyntaxTreeCache syntaxTreeCache = new SyntaxTreeCache(3);
     private final FeatureFinder framingIfFinder = new FramingIfTwoStepFinder();
 
     private final JTextArea codeArea;
@@ -100,7 +100,7 @@ public class EditorGUI extends JFrame {
         codeArea.setFont(new Font("Consolas", Font.PLAIN, 16));
 
         Document document = codeArea.getDocument();
-        document.addDocumentListener(new CodeChangedListener(this, codeParser, syntaxAnalyzer, syntaxTreeChangesCache, framingIfFinder));
+        document.addDocumentListener(new CodeChangedListener(this, codeParser, syntaxAnalyzer, syntaxTreeCache, framingIfFinder));
 
         return codeArea;
     }

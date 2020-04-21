@@ -11,11 +11,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FramingIfChangeSequenceFinderTest {
 
-    private SyntaxTreeChangesCache cache;
+    private SyntaxTreeCache cache;
 
     @BeforeEach
     private void tearUp() {
-        cache = new SyntaxTreeChangesCache(3);
+        cache = new SyntaxTreeCache(3);
     }
 
     @Test

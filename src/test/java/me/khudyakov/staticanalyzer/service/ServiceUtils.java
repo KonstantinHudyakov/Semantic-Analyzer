@@ -22,17 +22,30 @@ public class ServiceUtils {
         return syntaxAnalyzer.createSyntaxTree(programCode);
     }
 
-    static SyntaxTree addChange(SyntaxTreeChangesCache cache, String code) throws ParseException, SyntaxAnalyzerException {
+    static SyntaxTree addChange(SyntaxTreeCache cache, String code) throws ParseException, SyntaxAnalyzerException {
         SyntaxTree syntaxTree = parseAndAnalyze(code);
-        cache.addNewChange(syntaxTree);
+        cache.addNewSyntaxTreeVersion(syntaxTree);
 
         return syntaxTree;
     }
 
-    static List<SyntaxTree> addChangeSequence(SyntaxTreeChangesCache cache, String... codes) throws SyntaxAnalyzerException, ParseException {
+    static List<SyntaxTree> addChangeSequence(SyntaxTreeCache cache, String... codes) throws SyntaxAnalyzerException, ParseException {
         List<SyntaxTree> list = new ArrayList<>();
         for(String code : codes) {
             list.add(addChange(cache, code));
+        }
+
+        return list;
+    }
+
+    static List<SyntaxTree> addChangeSequenceNotThrow(SyntaxTreeCache cache, String... codes) {
+        List<SyntaxTree> list = new ArrayList<>();
+        for(String code : codes) {
+            try {
+                list.add(addChange(cache, code));
+            } catch (ParseException | SyntaxAnalyzerException ex) {
+                // do nothing
+            }
         }
 
         return list;

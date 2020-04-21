@@ -30,7 +30,7 @@ public class AssignStatement extends Statement {
 
     @Override
     public boolean contentEquals(Statement statement) {
-        if(!super.contentEquals(statement)) return false;
+        if(getClass() != statement.getClass()) return false;
         AssignStatement assignStatement = (AssignStatement) statement;
         return variable.equals(assignStatement.variable)
                 && expr.equals(assignStatement.expr);

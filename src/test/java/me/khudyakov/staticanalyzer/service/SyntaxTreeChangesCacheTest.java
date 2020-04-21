@@ -32,7 +32,7 @@ class SyntaxTreeChangesCacheTest {
     void addFirstStatement() throws ParseException, SyntaxAnalyzerException {
         SyntaxTree syntaxTree = addChange(cache, text1);
 
-        assertEquals(1, cache.size());
+        assertEquals(1, cache.changesSize());
 
         SyntaxTreeChange lastChange = checkSequenceSizeAndGetLastChange(1, 0);
         Statement addedNode = syntaxTree.getDfsOrder().get(1);
@@ -45,7 +45,7 @@ class SyntaxTreeChangesCacheTest {
         List<SyntaxTree> syntaxTreeList = addChangeSequence(cache, text1, text2);
         SyntaxTree lastTree = syntaxTreeList.get(1);
 
-        assertEquals(2, cache.size());
+        assertEquals(2, cache.changesSize());
 
         SyntaxTreeChange lastChange = checkSequenceSizeAndGetLastChange(1, 0);
         Statement addedNode = lastTree.getDfsOrder().get(1);
@@ -58,7 +58,7 @@ class SyntaxTreeChangesCacheTest {
         List<SyntaxTree> syntaxTreeList = addChangeSequence(cache, text1, text2, text3);
         SyntaxTree lastTree = syntaxTreeList.get(2);
 
-        assertEquals(2, cache.size());
+        assertEquals(2, cache.changesSize());
 
         SyntaxTreeChange lastChange = checkSequenceSizeAndGetLastChange(2, 1);
         Statement addedNode = lastTree.getDfsOrder().get(2);
@@ -71,7 +71,7 @@ class SyntaxTreeChangesCacheTest {
         List<SyntaxTree> syntaxTreeList = addChangeSequence(cache, text1, text2, text3, text2);
         SyntaxTree tree = syntaxTreeList.get(2);
 
-        assertEquals(3, cache.size());
+        assertEquals(3, cache.changesSize());
 
         SyntaxTreeChange lastChange = checkSequenceSizeAndGetLastChange(1, 0);
         Statement addedNode = tree.getDfsOrder().get(2);

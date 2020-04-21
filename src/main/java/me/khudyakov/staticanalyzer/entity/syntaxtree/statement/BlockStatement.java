@@ -23,6 +23,11 @@ public class BlockStatement extends Statement {
         return Collections.unmodifiableList(statements);
     }
 
+    @Override
+    public boolean contentEquals(Statement statement) {
+        return getClass() == statement.getClass();
+    }
+
     public int size() {
         return statements.size();
     }

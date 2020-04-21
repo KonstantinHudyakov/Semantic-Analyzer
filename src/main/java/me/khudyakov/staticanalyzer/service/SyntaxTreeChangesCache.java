@@ -5,22 +5,24 @@ import me.khudyakov.staticanalyzer.entity.syntaxtree.SyntaxTree;
 import me.khudyakov.staticanalyzer.entity.syntaxtree.statement.Statement;
 import me.khudyakov.staticanalyzer.entity.syntaxtree.SyntaxTreeChange;
 import me.khudyakov.staticanalyzer.entity.syntaxtree.SyntaxTreeChange.ChangeType;
+import me.khudyakov.staticanalyzer.util.TreeUtils;
 
 import java.util.*;
 
 public class SyntaxTreeChangesCache {
 
     private final Deque<List<SyntaxTreeChange>> changes = new LinkedList<>();
+    private final List<SyntaxTree> syntaxTreeVersions = new LinkedList<>();
     private final int maxCacheSize;
-
-    private SyntaxTree prevTree = SyntaxTree.EMPTY_TREE;
 
     public SyntaxTreeChangesCache(int maxCacheSize) {
         this.maxCacheSize = maxCacheSize;
+        syntaxTreeVersions.add(SyntaxTree.EMPTY_TREE);
     }
 
     public boolean addNewChange(SyntaxTree curTree) {
-        Pair<Statement, Statement> diff = findDiff(prevTree, curTree);
+        SyntaxTree prevTree = getLastSyntaxTree();
+        Pair<Statement, Statement> diff = TreeUtils.findDiff(prevTree, curTree);
         Statement prevVersion = diff.getKey();
         Statement curVersion = diff.getValue();
         SyntaxTreeChange newChange;
@@ -43,7 +45,7 @@ public class SyntaxTreeChangesCache {
             // some multiple changes occurred
             changes.clear();
         }
-        prevTree = curTree;
+        addNewSyntaxTreeVersion(curTree);
         return true;
     }
 
@@ -51,33 +53,28 @@ public class SyntaxTreeChangesCache {
         return changes.getLast();
     }
 
-    public int size() {
+    public SyntaxTree getLastSyntaxTree() {
+        return syntaxTreeVersions.get(syntaxTreeVersions.size() - 1);
+    }
+
+    /**
+     * @param num - number of SyntaxTree from newest to oldest (0 - last version of tree)
+     * @return SyntaxTree of desired version from newest to oldest
+     */
+    public SyntaxTree getSyntaxTree(int num) {
+        return syntaxTreeVersions.get(syntaxTreeVersions.size() - num - 1);
+    }
+
+    public int changesSize() {
         return changes.size();
     }
 
-    private Pair<Statement, Statement> findDiff(SyntaxTree prevTree, SyntaxTree curTree) {
-        Stack<Statement> stCur = new Stack<>();
-        Stack<Statement> stPrev = new Stack<>();
-        addStatementsToStack(stCur, curTree.getRoot().getChildren());
-        addStatementsToStack(stPrev, prevTree.getRoot().getChildren());
+    public int treeVersionsSize() {
+        return syntaxTreeVersions.size();
+    }
 
-        while (!stPrev.isEmpty() && !stCur.isEmpty()) {
-            Statement prev = stPrev.pop();
-            Statement cur = stCur.pop();
-            if (!prev.contentEquals(cur)) {
-                return new Pair<>(prev, cur);
-            }
-            addStatementsToStack(stCur, cur.getChildren());
-            addStatementsToStack(stPrev, prev.getChildren());
-        }
-
-        if (stPrev.isEmpty() && stCur.isEmpty()) {
-            return new Pair<>(Statement.EMPTY_STATEMENT, Statement.EMPTY_STATEMENT);
-        } else if (stPrev.isEmpty()) {
-            return new Pair<>(Statement.EMPTY_STATEMENT, stCur.peek());
-        } else {
-            return new Pair<>(stPrev.peek(), Statement.EMPTY_STATEMENT);
-        }
+    public int getMaxCacheSize() {
+        return maxCacheSize;
     }
 
     private void handleInserting(Statement curVersion) {
@@ -106,9 +103,13 @@ public class SyntaxTreeChangesCache {
         }
     }
 
-    private void addStatementsToStack(Stack<Statement> stack, List<? extends Statement> statements) {
-        for (int i = statements.size() - 1; i >= 0; i--) {
-            stack.push(statements.get(i));
+    private void addNewSyntaxTreeVersion(SyntaxTree tree) {
+        Pair<Statement, Statement> diff = TreeUtils.findDiff(getLastSyntaxTree(), tree);
+        if(diff.getKey() != Statement.EMPTY_STATEMENT || diff.getValue() != Statement.EMPTY_STATEMENT) {
+            syntaxTreeVersions.add(tree);
+            if(syntaxTreeVersions.size() > maxCacheSize) {
+                syntaxTreeVersions.remove(0);
+            }
         }
     }
 }

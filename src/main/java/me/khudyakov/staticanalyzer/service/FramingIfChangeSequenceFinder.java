@@ -7,7 +7,7 @@ import me.khudyakov.staticanalyzer.entity.syntaxtree.SyntaxTreeChange.ChangeType
 
 import java.util.List;
 
-public class FramingIfFeatureFinder implements FeatureFinder {
+public class FramingIfChangeSequenceFinder implements FramingIfFinder {
 
     @Override
     public boolean featureFound(SyntaxTreeChangesCache syntaxTreeChangesCache) {

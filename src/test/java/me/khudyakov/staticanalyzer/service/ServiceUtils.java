@@ -15,7 +15,7 @@ public class ServiceUtils {
 
     static final CodeParser codeParser = new CodeParserImpl();
     static final SyntaxAnalyzer syntaxAnalyzer = new SyntaxAnalyzerImpl();
-    static final FeatureFinder framingIfFinder = new FramingIfFeatureFinder();
+    static final FeatureFinder framingIfFinder = new FramingIfTwoStepFinder();
 
     static SyntaxTree parseAndAnalyze(String code) throws SyntaxAnalyzerException, ParseException {
         ProgramCode programCode = codeParser.parse(code);

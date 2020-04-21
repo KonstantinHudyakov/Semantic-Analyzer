@@ -9,7 +9,7 @@ import java.text.ParseException;
 import static me.khudyakov.staticanalyzer.service.ServiceUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-class FramingIfChangeSequenceFinderTest {
+class FramingIfFinderTest {
 
     private SyntaxTreeCache cache;
 

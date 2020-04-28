@@ -41,11 +41,7 @@ public class CodeChangedListener implements DocumentListener {
             Program program = parseAndAnalyzeProgram();
             boolean isChanged = syntaxTreeCache.addNewSyntaxTreeVersion(program.getSyntaxTree());
             if(isChanged && framingIfFinder.featureFound(syntaxTreeCache)) {
-                JTextArea codeArea = editorGUI.getCodeArea();
-                Caret caret = codeArea.getCaret();
-                Point caretPos = caret.getMagicCaretPosition();
-                Point codeAreaPos = codeArea.getLocationOnScreen();
-                editorGUI.showPopupLabel("Added framing if statement!!!", caretPos.x + codeAreaPos.x + 15, caretPos.y + codeAreaPos.y + 15);
+                showFramingIfPopup();
             }
         } catch (Exception ex) {
             // do nothing
@@ -73,6 +69,14 @@ public class CodeChangedListener implements DocumentListener {
         SyntaxTree syntaxTree = syntaxAnalyzer.createSyntaxTree(programCode);
 
         return new Program(programCode, syntaxTree);
+    }
+
+    private void showFramingIfPopup() {
+        JTextArea codeArea = editorGUI.getCodeArea();
+        Caret caret = codeArea.getCaret();
+        Point caretPos = caret.getMagicCaretPosition();
+        Point codeAreaPos = codeArea.getLocationOnScreen();
+        editorGUI.showPopupLabel("Added framing if statement!!!", caretPos.x + codeAreaPos.x + 15, caretPos.y + codeAreaPos.y + 15);
     }
 
     private String getText() {

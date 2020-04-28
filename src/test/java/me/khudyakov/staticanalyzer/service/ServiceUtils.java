@@ -1,17 +1,14 @@
 package me.khudyakov.staticanalyzer.service;
 
-import me.khudyakov.staticanalyzer.entity.syntaxtree.SyntaxTree;
 import me.khudyakov.staticanalyzer.entity.ProgramCode;
+import me.khudyakov.staticanalyzer.entity.syntaxtree.SyntaxTree;
 import me.khudyakov.staticanalyzer.util.SyntaxAnalyzerException;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-public class ServiceUtils {
+class ServiceUtils {
 
     static final CodeParser codeParser = new CodeParserImpl();
     static final SyntaxAnalyzer syntaxAnalyzer = new SyntaxAnalyzerImpl();
@@ -34,7 +31,6 @@ public class ServiceUtils {
         for(String code : codes) {
             list.add(addChange(cache, code));
         }
-
         return list;
     }
 
@@ -47,7 +43,6 @@ public class ServiceUtils {
                 // do nothing
             }
         }
-
         return list;
     }
 
@@ -55,11 +50,5 @@ public class ServiceUtils {
         for (String code : codes) {
             parseAndAnalyze(code);
         }
-    }
-
-    // this method may be used with another argument in future
-    static void analyzeAndCatchExceptions(Class<? extends Throwable> expectedException, String... codes) {
-        Arrays.stream(codes)
-              .forEach(code -> assertThrows(expectedException, () -> parseAndAnalyze(code)));
     }
 }

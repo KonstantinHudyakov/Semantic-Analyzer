@@ -35,7 +35,7 @@ public class RunMenuListener implements MenuListener {
 
             program.execute();
         } catch (Exception ex) {
-            OutputAreaWriter.setContent("Errors in the code!");
+            OutputAreaWriter.setContent(ex.getMessage());
         }
     }
 

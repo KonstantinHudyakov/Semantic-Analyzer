@@ -10,8 +10,7 @@ public class ExpressionStatement extends Statement {
 
     private final Expression expression;
 
-    public ExpressionStatement(Expression expression, int startInd, int endInd) {
-        super(startInd, endInd);
+    public ExpressionStatement(Expression expression) {
         this.expression = expression;
     }
 
@@ -32,8 +31,6 @@ public class ExpressionStatement extends Statement {
                 && expression.equals(((ExpressionStatement) statement).expression);
     }
 
-
-    // this method may be used in future
     public Expression getExpression() {
         return expression;
     }

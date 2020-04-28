@@ -45,10 +45,7 @@ public class FramingIfFinder implements FeatureFinder {
             }
             return checkNodesAfterBlockEqual(oldVersion, block);
         }
-
-
         return false;
-
     }
 
     private boolean checkNodesAfterBlockEqual(Statement oldNode, BlockStatement insertedBlock) {

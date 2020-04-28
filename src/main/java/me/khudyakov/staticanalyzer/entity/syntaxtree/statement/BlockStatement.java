@@ -8,8 +8,7 @@ public class BlockStatement extends Statement {
 
     private final List<? extends Statement> statements;
 
-    public BlockStatement(List<? extends Statement> statements, int startInd, int endInd) {
-        super(startInd, endInd);
+    public BlockStatement(List<? extends Statement> statements) {
         this.statements = statements;
     }
 
@@ -32,12 +31,10 @@ public class BlockStatement extends Statement {
         return statements.size();
     }
 
-    // this method may be used in future
     public Statement get(int index) {
         return statements.get(index);
     }
 
-    // this method may be used in future
     public Stream<? extends Statement> stream() {
         return statements.stream();
     }

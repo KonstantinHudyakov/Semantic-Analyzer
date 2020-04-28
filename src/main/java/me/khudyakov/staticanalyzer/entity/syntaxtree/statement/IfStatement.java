@@ -10,8 +10,7 @@ public class IfStatement extends Statement {
     private final Expression condition;
     private final Statement body;
 
-    public IfStatement(Expression condition, Statement body, int startInd, int endInd) {
-        super(startInd, endInd);
+    public IfStatement(Expression condition, Statement body) {
         this.condition = condition;
         this.body = body;
     }
@@ -34,7 +33,6 @@ public class IfStatement extends Statement {
                 && condition.equals(((IfStatement) statement).condition);
     }
 
-    // this method may be used in future
     public Expression getCondition() {
         return condition;
     }

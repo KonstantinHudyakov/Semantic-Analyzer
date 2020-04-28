@@ -5,9 +5,11 @@ import me.khudyakov.staticanalyzer.util.SyntaxAnalyzerException;
 import org.junit.jupiter.api.Test;
 
 import java.text.ParseException;
+import java.util.Arrays;
 
-import static me.khudyakov.staticanalyzer.service.ServiceUtils.*;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static me.khudyakov.staticanalyzer.service.ServiceUtils.analyzeOrThrow;
+import static me.khudyakov.staticanalyzer.service.ServiceUtils.parseAndAnalyze;
+import static org.junit.jupiter.api.Assertions.*;
 
 class SyntaxAnalyzerTest {
 
@@ -25,7 +27,7 @@ class SyntaxAnalyzerTest {
     }
 
     @Test
-    void analyze2() throws SyntaxAnalyzerException,  ParseException {
+    void analyze2() throws SyntaxAnalyzerException, ParseException {
         String inputProgram = "{ @ x= 2;\n" +
                 " @second = -3 ; }\n" +
                 "if (second - 19) {\n" +
@@ -40,7 +42,7 @@ class SyntaxAnalyzerTest {
     }
 
     @Test
-    void assignInput() throws SyntaxAnalyzerException, ParseException {
+    void assignInput() {
         String text1 = "@";
         String text2 = "@x";
         String text3 = "@x=";
@@ -48,8 +50,9 @@ class SyntaxAnalyzerTest {
         String text5 = "@x=25";
         String text6 = "@x=25;";
 
-        analyzeAndCatchExceptions(SyntaxAnalyzerException.class, text1, text2, text3, text4, text5);
-        assertNotNull(parseAndAnalyze(text6));
+        Arrays.stream(new String[]{text1, text2, text3, text4, text5})
+              .forEach(code -> assertThrows(SyntaxAnalyzerException.class, () -> parseAndAnalyze(code)));
+        assertDoesNotThrow(() -> parseAndAnalyze(text6));
     }
 
     @Test

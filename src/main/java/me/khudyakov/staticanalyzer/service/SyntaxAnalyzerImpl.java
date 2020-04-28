@@ -46,9 +46,8 @@ public class SyntaxAnalyzerImpl implements SyntaxAnalyzer {
         }
 
         SyntaxTree buildTree() throws SyntaxAnalyzerException {
-            int startInd = curInd;
             List<Statement> statementList = statementList();
-            BlockStatement blockStatement = new BlockStatement(statementList, startInd, curInd - 1);
+            BlockStatement blockStatement = new BlockStatement(statementList);
             return new SyntaxTree(blockStatement);
         }
 
@@ -88,7 +87,6 @@ public class SyntaxAnalyzerImpl implements SyntaxAnalyzer {
          * BlockStatement -> { StatementList }
          */
         private BlockStatement blockStatement() throws SyntaxAnalyzerException {
-            int startInd = curInd;
             checkTypeOfCurOrThrow(OPEN_BRACE);
             List<Statement> statementList = new ArrayList<>();
             while (checkTypeOfCur(TokenUtils::isStatementStart)) {
@@ -96,72 +94,60 @@ public class SyntaxAnalyzerImpl implements SyntaxAnalyzer {
             }
             checkTypeOfCurOrThrow(CLOSE_BRACE);
 
-            return new BlockStatement(statementList, startInd, curInd - 1);
+            return new BlockStatement(statementList);
         }
 
         /**
          * IfStatement -> if ( Expression ) Statement
          */
         private IfStatement ifStatement() throws SyntaxAnalyzerException {
-            int startInd = curInd;
             checkTypeOfCurOrThrow(IF);
             checkTypeOfCurOrThrow(OPEN_PARENTHESIS);
             Expression condition = checkTypeOfCur(CLOSE_PARENTHESIS) ? Expression.EMPTY_EXPRESSION : expression();
             checkTypeOfCurOrThrow(CLOSE_PARENTHESIS);
-            int endInd = curInd - 1;
             Statement body = statement();
 
-            return new IfStatement(condition, body, startInd, endInd);
+            return new IfStatement(condition, body);
         }
 
         /**
          * AssignStatement -> @ Identifier = Expression ;
          */
         private AssignStatement assignStatement() throws SyntaxAnalyzerException {
-            int startInd = curInd;
             checkTypeOfCurOrThrow(ASSIGN_IDENTIFIER);
             Variable variable = variable();
             checkTypeOfCurOrThrow(ASSIGN);
             Expression expr = expression();
             checkTypeOfCurOrThrow(SEMICOLON);
 
-            return new AssignStatement(variable, expr, startInd, curInd - 1);
+            return new AssignStatement(variable, expr);
         }
 
         /**
          * ExpressionStatement -> Expression ;
          */
         private ExpressionStatement expressionStatement() throws SyntaxAnalyzerException {
-            int startInd = curInd;
             Expression expr = expression();
             checkTypeOfCurOrThrow(SEMICOLON);
 
-            return new ExpressionStatement(expr, startInd, curInd - 1);
+            return new ExpressionStatement(expr);
         }
 
         /**
-         * Заданная грамматика для арифметических выражений:
          * Expression -> PlusMinusExpr | PlusMinusExpr > PlusMinusExpr | PlusMinusExpr < PlusMinusExpr
-         * PlusMinusExpr -> MultDivExpr | PlusMinusExpr + MultDivExpr | PlusMinusExpr - MultDivExpr
-         * MultDivExpr -> SimpleExpr | MultDivExpr * SimpleExpr | MultDivExpr / SimpleExpr
-         * SimpleExpression -> Identifier | Integer | ( Expression )
-         * <p>
-         * Избавимся от левой рекурсии:
-         * <p>
-         * Expression -> PlusMinusExpr | PlusMinusExpr > PlusMinusExpr | PlusMinusExpr < PlusMinusExpr
-         * PlusMinusExpr -> MultDivExpr | MultDivExpr + PlusMinusExpr2 | MultDivExpr - PlusMinusExpr2
-         * PlusMinusExpr2 -> MultDivExpr | MultDivExpr + PlusMinusExpr2 | MultDivExpr - PlusMinusExpr2
-         * MultDivExpr -> SimpleExpr | SimpleExpr * MultDivExpr2 | SimpleExpr / MultDivExpr2
-         * MultDivExpr2 -> SimpleExpr | SimpleExpr * MultDivExpr2 | SimpleExpr / MultDivExpr2
-         * SimpleExpression -> Identifier | Integer | ( Expression )
-         * <p>
-         * Заменим левую рекурсию на цикл
          */
         private Expression expression() throws SyntaxAnalyzerException {
             Expression leftExpr = plusMinusExpression();
             if (checkTypeOfCur(TokenUtils::isCompareOperation)) {
                 Token cur = getCurOrThrow();
-                BinaryOperator operator = isTokenOfType(cur, GREATER) ? new GreaterOperator() : new LessOperator();
+                BinaryOperator operator = null;
+                if(isTokenOfType(cur, GREATER)) {
+                    operator = new GreaterOperator();
+                } else if(isTokenOfType(cur, LESS)) {
+                    operator = new LessOperator();
+                } else {
+                    throwError(cur);
+                }
                 curInd++;
                 Expression rightExpr = plusMinusExpression();
                 return new BinaryOperation(operator, leftExpr, rightExpr);
@@ -170,14 +156,20 @@ public class SyntaxAnalyzerImpl implements SyntaxAnalyzer {
         }
 
         /**
-         * PlusMinusExpr -> MultDivExpr | MultDivExpr + PlusMinusExpr2 | MultDivExpr - PlusMinusExpr2
-         * PlusMinusExpr2 -> MultDivExpr | MultDivExpr + PlusMinusExpr2 | MultDivExpr - PlusMinusExpr2
+         * PlusMinusExpr -> MultDivExpr | PlusMinusExpr + MultDivExpr | PlusMinusExpr - MultDivExpr
          */
         private Expression plusMinusExpression() throws SyntaxAnalyzerException {
             Expression expr = multiplyDivisionExpression();
             while (checkTypeOfCur(TokenUtils::isPlusMinus)) {
                 Token cur = getCurOrThrow();
-                BinaryOperator operator = isTokenOfType(cur, ADDITION) ? new AdditionOperator() : new SubtractionOperator();
+                BinaryOperator operator = null;
+                if(isTokenOfType(cur, ADDITION)) {
+                    operator = new AdditionOperator();
+                } else if(isTokenOfType(cur, SUBTRACTION)) {
+                    operator = new SubtractionOperator();
+                } else {
+                    throwError(cur);
+                }
                 curInd++;
                 Expression rightExpr = multiplyDivisionExpression();
                 expr = new BinaryOperation(operator, expr, rightExpr);
@@ -186,14 +178,20 @@ public class SyntaxAnalyzerImpl implements SyntaxAnalyzer {
         }
 
         /**
-         * MultDivExpr -> SimpleExpr | SimpleExpr * MultDivExpr2 | SimpleExpr / MultDivExpr2
-         * MultDivExpr2 -> SimpleExpr | SimpleExpr * MultDivExpr2 | SimpleExpr / MultDivExpr2
+         * MultDivExpr -> SimpleExpr | MultDivExpr * SimpleExpr | MultDivExpr / SimpleExpr
          */
         private Expression multiplyDivisionExpression() throws SyntaxAnalyzerException {
             Expression expr = simpleExpression();
             while (checkTypeOfCur(TokenUtils::isMultiplyDivision)) {
                 Token cur = getCurOrThrow();
-                BinaryOperator operator = isTokenOfType(cur, DIVISION) ? new DivisionOperator() : new MultiplicationOperator();
+                BinaryOperator operator = null;
+                if(isTokenOfType(cur, MULTIPLICATION)) {
+                    operator = new MultiplicationOperator();
+                } else if(isTokenOfType(cur, DIVISION)) {
+                    operator = new DivisionOperator();
+                } else {
+                    throwError(cur);
+                }
                 curInd++;
                 Expression rightExpr = simpleExpression();
                 expr = new BinaryOperation(operator, expr, rightExpr);

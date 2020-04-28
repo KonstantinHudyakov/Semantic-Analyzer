@@ -11,8 +11,7 @@ public class AssignStatement extends Statement {
     private final Variable variable;
     private final Expression expr;
 
-    public AssignStatement(Variable variable, Expression expr, int startInd, int endInd) {
-        super(startInd, endInd);
+    public AssignStatement(Variable variable, Expression expr) {
         this.variable = variable;
         this.expr = expr;
     }

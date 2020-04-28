@@ -24,13 +24,6 @@ public class OutputAreaWriter {
         }
     }
 
-    // this method may be used in future
-    public static void print(String text) {
-        if(outputArea != null) {
-            outputArea.append(text);
-        }
-    }
-
     public static void clear() {
         if(outputArea != null) {
             outputArea.setText("");

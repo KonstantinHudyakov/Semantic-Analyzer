@@ -15,6 +15,8 @@ public class FramingIfFinder implements FeatureFinder {
             return false;
         }
         SyntaxTree curTree = cache.getLastSyntaxTree();
+        // previous version of SyntaxTree
+        SyntaxTree prevTree = cache.getSyntaxTree(1);
         // SyntaxTree before two modifications
         SyntaxTree oldTree = cache.getSyntaxTree(2);
         if (curTree.getSize() - oldTree.getSize() != 2) {
@@ -22,32 +24,31 @@ public class FramingIfFinder implements FeatureFinder {
             return false;
         }
 
-        Pair<Statement, Statement> diff = TreeUtils.findDiff(oldTree, curTree);
-        Statement oldVersion = diff.getKey();
-        Statement curVersion = diff.getValue();
-        if (oldVersion == Statement.EMPTY_STATEMENT) {
-            // it means that two statements added to the end of program
-            // it is not our case because if new statements is IfStatement and Block,
-            // block will be empty
+        Pair<Statement, Statement> curOldDiff = TreeUtils.findDiff(oldTree, curTree);
+        Pair<Statement, Statement> curPrevDiff = TreeUtils.findDiff(prevTree, curTree);
+        // verify that IfStatement is added first and then BlockStatement
+        if (!(curOldDiff.getValue() instanceof IfStatement)
+                || !(curPrevDiff.getValue() instanceof BlockStatement)) {
             return false;
         }
 
-        // check that inserted construction if(...) { FramedStatements }
-        // and FramedStatements content equals previous version's statements content
-        if (curVersion instanceof IfStatement) {
-            IfStatement ifStatement = (IfStatement) curVersion;
-            if (ifStatement.getBody() instanceof BlockStatement) {
-                BlockStatement block = (BlockStatement) ifStatement.getBody();
-                // check that framing block is not empty
-                // or added block that framed block from previous version
-                if (block.size() == 0 || block.size() == 1 && block.next() instanceof BlockStatement) {
-                    return false;
-                }
-                return checkNodesAfterBlockEqual(oldVersion, block);
+        // node that been here before modifications and inserted ifStatement
+        Statement oldVersion = curOldDiff.getKey();
+        IfStatement ifStatement = (IfStatement) curOldDiff.getValue();
+
+        if (ifStatement.getBody() instanceof BlockStatement) {
+            BlockStatement block = (BlockStatement) ifStatement.getBody();
+            // check that framing block is not empty
+            // or added block that framed block from previous version
+            if (block.size() == 0 || block.size() == 1 && block.next() instanceof BlockStatement) {
+                return false;
             }
+            return checkNodesAfterBlockEqual(oldVersion, block);
         }
 
+
         return false;
+
     }
 
     private boolean checkNodesAfterBlockEqual(Statement oldNode, BlockStatement insertedBlock) {

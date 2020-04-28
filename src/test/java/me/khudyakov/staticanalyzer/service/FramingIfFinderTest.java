@@ -111,6 +111,17 @@ class FramingIfFinderTest {
     }
 
     @Test
+    void dontCatchInsertIfAfterAddingBlock() throws SyntaxAnalyzerException, ParseException {
+        String text1 = "@y = 314; 3 * 2 - 4 - 22; @xrt = 4 * 5;";
+        String text2 = "@y = 314; { 3 * 2 - 4 - 22; @xrt = 4 * 5; }";
+        String text3 = "@y = 314; if(y > 3) { 3 * 2 - 4 - 22; @xrt = 4 * 5; }";
+
+        addChangeSequence(cache, text1, text2, text3);
+        assertFalse(framingIfFinder.featureFound(cache));
+    }
+
+
+    @Test
     void dontCatchFramingNothing() throws SyntaxAnalyzerException, ParseException {
         String text1 = "3 * 7;";
         String text2 = "if() 3 * 7;";

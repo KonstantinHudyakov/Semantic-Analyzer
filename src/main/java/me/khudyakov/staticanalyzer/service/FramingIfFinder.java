@@ -49,19 +49,17 @@ public class FramingIfFinder implements FeatureFinder {
     }
 
     private boolean checkNodesAfterBlockEqual(Statement oldNode, BlockStatement insertedBlock) {
-        int curInd = 0;
         boolean contentEqual = true;
         Statement curNode = insertedBlock.next();
 
-        while (curInd < insertedBlock.size() && contentEqual && oldNode != null) {
+        while (contentEqual && curNode != null && oldNode != null) {
             if (!isNodesEqual(curNode, oldNode)) {
                 contentEqual = false;
             }
             oldNode = oldNode.next();
             curNode = curNode.next();
-            curInd++;
         }
-        return contentEqual && curInd == insertedBlock.size();
+        return contentEqual;
     }
 
     private boolean isNodesEqual(Statement st1, Statement st2) {

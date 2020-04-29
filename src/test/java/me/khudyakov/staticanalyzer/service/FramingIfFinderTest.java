@@ -170,4 +170,14 @@ class FramingIfFinderTest {
         addChangeSequence(cache, text1, text2, text3);
         assertFalse(framingIfFinder.featureFound(cache));
     }
+
+    @Test
+    void dontCatchPlaceWrongBrackets() throws SyntaxAnalyzerException, ParseException {
+        String text1 = "{ @x = 3; x * 3; } { @y = x; }";
+        String text2 = "if(1 > 0) { @x = 3; x * 3; } { @y = x; }";
+        String text3 = "if(1 > 0) { { @x = 3; x * 3; } { } @y = x; }";
+
+        addChangeSequence(cache, text1, text2, text3);
+        assertFalse(framingIfFinder.featureFound(cache));
+    }
 }

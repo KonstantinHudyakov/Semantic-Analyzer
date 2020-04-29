@@ -2,6 +2,7 @@ package me.khudyakov.staticanalyzer.entity.syntaxtree;
 
 import me.khudyakov.staticanalyzer.entity.syntaxtree.statement.BlockStatement;
 import me.khudyakov.staticanalyzer.entity.syntaxtree.statement.Statement;
+import me.khudyakov.staticanalyzer.service.SyntaxTreeVisitor;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -22,6 +23,10 @@ public class SyntaxTree {
         setNextPointers(root);
         // removing dummy node
         dfsOrder.remove(0);
+    }
+
+    public void accept(SyntaxTreeVisitor syntaxTreeVisitor) {
+        syntaxTreeVisitor.visit(root);
     }
 
     private void setNextPointers(Statement root) {

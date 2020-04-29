@@ -1,10 +1,10 @@
 package me.khudyakov.staticanalyzer.editor;
 
-import me.khudyakov.staticanalyzer.entity.Program;
 import me.khudyakov.staticanalyzer.entity.ProgramCode;
 import me.khudyakov.staticanalyzer.entity.syntaxtree.SyntaxTree;
 import me.khudyakov.staticanalyzer.service.CodeParser;
 import me.khudyakov.staticanalyzer.service.SyntaxAnalyzer;
+import me.khudyakov.staticanalyzer.service.SyntaxTreeVisitor;
 
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
@@ -17,11 +17,14 @@ public class RunMenuListener implements MenuListener {
 
     private final CodeParser codeParser;
     private final SyntaxAnalyzer syntaxAnalyzer;
+    private final SyntaxTreeVisitor programExecutionVisitor;
 
-    public RunMenuListener(Document codeDocument, CodeParser codeParser, SyntaxAnalyzer syntaxAnalyzer) {
+    public RunMenuListener(Document codeDocument, CodeParser codeParser, SyntaxAnalyzer syntaxAnalyzer,
+                           SyntaxTreeVisitor programExecutionVisitor) {
         this.codeDocument = codeDocument;
         this.codeParser = codeParser;
         this.syntaxAnalyzer = syntaxAnalyzer;
+        this.programExecutionVisitor = programExecutionVisitor;
     }
 
     @Override
@@ -31,9 +34,7 @@ public class RunMenuListener implements MenuListener {
         try {
             ProgramCode programCode = codeParser.parse(text);
             SyntaxTree syntaxTree = syntaxAnalyzer.createSyntaxTree(programCode);
-            Program program = new Program(programCode, syntaxTree);
-
-            program.execute();
+            syntaxTree.accept(programExecutionVisitor);
         } catch (Exception ex) {
             OutputAreaWriter.setContent(ex.getMessage());
         }

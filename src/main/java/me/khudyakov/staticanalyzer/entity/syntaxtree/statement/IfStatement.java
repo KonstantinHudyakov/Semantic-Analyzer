@@ -16,13 +16,6 @@ public class IfStatement extends Statement {
     }
 
     @Override
-    public void execute() {
-        if (condition.execute() != 0) {
-            body.execute();
-        }
-    }
-
-    @Override
     public List<? extends Statement> getChildren() {
         return Collections.singletonList(body);
     }

@@ -101,7 +101,7 @@ public class CodeParserImpl implements CodeParser {
                             token = new Token("if", IF);
                         }
                     } else {
-                        throw new ParseException(String.format("Некорректный символ '%s' в выражении \"%s\"", arr[i], word), i);
+                        throw new ParseException(String.format("Incorrect symbol '%s' in word \"%s\"", arr[i], word), i);
                     }
                     i += token.getValue().length() - 1;
                 }

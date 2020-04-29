@@ -17,12 +17,6 @@ public class AssignStatement extends Statement {
     }
 
     @Override
-    public void execute() {
-        int value = expr.execute();
-        variable.setValue(value);
-    }
-
-    @Override
     public List<? extends Statement> getChildren() {
         return Collections.emptyList();
     }

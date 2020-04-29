@@ -6,10 +6,6 @@ import java.util.List;
 public abstract class Statement {
 
     public static final Statement EMPTY_STATEMENT = new Statement() {
-        @Override
-        public void execute() {
-            // do nothing
-        }
 
         @Override
         public boolean contentEquals(Statement statement) {
@@ -26,8 +22,6 @@ public abstract class Statement {
      * Next node in SyntaxTree in DFS order
      */
     private Statement next;
-
-    public abstract void execute();
 
     public abstract List<? extends Statement> getChildren();
 

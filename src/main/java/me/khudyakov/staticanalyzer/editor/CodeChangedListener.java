@@ -1,6 +1,5 @@
 package me.khudyakov.staticanalyzer.editor;
 
-import me.khudyakov.staticanalyzer.entity.Program;
 import me.khudyakov.staticanalyzer.entity.ProgramCode;
 import me.khudyakov.staticanalyzer.entity.syntaxtree.SyntaxTree;
 import me.khudyakov.staticanalyzer.service.CodeParser;
@@ -38,8 +37,8 @@ public class CodeChangedListener implements DocumentListener {
     @Override
     public void insertUpdate(DocumentEvent e) {
         try {
-            Program program = parseAndAnalyzeProgram();
-            boolean isChanged = syntaxTreeCache.addNewSyntaxTreeVersion(program.getSyntaxTree());
+            SyntaxTree syntaxTree = parseAndAnalyzeProgram();
+            boolean isChanged = syntaxTreeCache.addNewSyntaxTreeVersion(syntaxTree);
             if(isChanged && framingIfFinder.featureFound(syntaxTreeCache)) {
                 showFramingIfPopup();
             }
@@ -51,8 +50,8 @@ public class CodeChangedListener implements DocumentListener {
     @Override
     public void removeUpdate(DocumentEvent e) {
         try {
-            Program program = parseAndAnalyzeProgram();
-            syntaxTreeCache.addNewSyntaxTreeVersion(program.getSyntaxTree());
+            SyntaxTree syntaxTree = parseAndAnalyzeProgram();
+            syntaxTreeCache.addNewSyntaxTreeVersion(syntaxTree);
         } catch (Exception ex) {
             // do nothing
         }
@@ -63,12 +62,10 @@ public class CodeChangedListener implements DocumentListener {
         // do nothing
     }
 
-    private Program parseAndAnalyzeProgram() throws Exception {
+    private SyntaxTree parseAndAnalyzeProgram() throws Exception {
         String text = getText();
         ProgramCode programCode = codeParser.parse(text);
-        SyntaxTree syntaxTree = syntaxAnalyzer.createSyntaxTree(programCode);
-
-        return new Program(programCode, syntaxTree);
+        return syntaxAnalyzer.createSyntaxTree(programCode);
     }
 
     private void showFramingIfPopup() {

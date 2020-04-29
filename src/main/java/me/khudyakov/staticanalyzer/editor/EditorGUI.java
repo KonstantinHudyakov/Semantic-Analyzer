@@ -16,6 +16,7 @@ public class EditorGUI extends JFrame {
 
     private final CodeParser codeParser = new CodeParserImpl();
     private final SyntaxAnalyzer syntaxAnalyzer = new SyntaxAnalyzerImpl();
+    private final SyntaxTreeVisitor programExecutionVisitor = new ProgramExecutionVisitor();
     private final SyntaxTreeCache syntaxTreeCache = new SyntaxTreeCache(3);
     private final FeatureFinder framingIfFinder = new FramingIfFinder();
 
@@ -140,7 +141,7 @@ public class EditorGUI extends JFrame {
     private JMenu runMenu() {
         JMenu runMenu = new JMenu("Run");
         runMenu.setPreferredSize(new Dimension(40, 20));
-        runMenu.addMenuListener(new RunMenuListener(codeArea.getDocument(), codeParser, syntaxAnalyzer));
+        runMenu.addMenuListener(new RunMenuListener(codeArea.getDocument(), codeParser, syntaxAnalyzer, programExecutionVisitor));
 
         return runMenu;
     }

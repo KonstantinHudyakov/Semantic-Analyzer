@@ -3,8 +3,6 @@ package me.khudyakov.staticanalyzer.service;
 import me.khudyakov.staticanalyzer.editor.EditorGUI;
 import me.khudyakov.staticanalyzer.editor.OutputAreaWriter;
 import me.khudyakov.staticanalyzer.entity.syntaxtree.SyntaxTree;
-import me.khudyakov.staticanalyzer.entity.Program;
-import me.khudyakov.staticanalyzer.entity.ProgramCode;
 import me.khudyakov.staticanalyzer.util.SyntaxAnalyzerException;
 import org.junit.jupiter.api.Test;
 
@@ -14,8 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ProgramExecutionTest {
 
-    private final SyntaxAnalyzer syntaxAnalyzer = new SyntaxAnalyzerImpl();
-    private final CodeParser codeParser = new CodeParserImpl();
+    private static final SyntaxTreeVisitor programExecutionVisitor = new ProgramExecutionVisitor();
 
     private static final EditorGUI editorGUI = new EditorGUI();
 
@@ -29,11 +26,8 @@ class ProgramExecutionTest {
                 "}\n" +
                 "x*second + second/x*3;";
 
-        ProgramCode programCode = codeParser.parse(inputProgram);
-        SyntaxTree syntaxTree = syntaxAnalyzer.createSyntaxTree(programCode);
-        Program program = new Program(programCode, syntaxTree);
-
-        program.execute();
+        SyntaxTree syntaxTree = ServiceUtils.parseAndAnalyze(inputProgram);
+        syntaxTree.accept(programExecutionVisitor);
 
         String[] nums = OutputAreaWriter.getText().split("\n");
         assertEquals(11, Integer.parseInt(nums[0]));
@@ -54,11 +48,8 @@ class ProgramExecutionTest {
                 "{ { x*second + second/x*3; } " +
                 "x*second ; }";
 
-        ProgramCode programCode = codeParser.parse(inputProgram);
-        SyntaxTree syntaxTree = syntaxAnalyzer.createSyntaxTree(programCode);
-        Program program = new Program(programCode, syntaxTree);
-
-        program.execute();
+        SyntaxTree syntaxTree = ServiceUtils.parseAndAnalyze(inputProgram);
+        syntaxTree.accept(programExecutionVisitor);
 
         String[] nums = OutputAreaWriter.getText().split("\n");
         assertEquals(3, Integer.parseInt(nums[0]));

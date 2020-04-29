@@ -1,6 +1,5 @@
 package me.khudyakov.staticanalyzer.entity.syntaxtree.statement;
 
-import me.khudyakov.staticanalyzer.editor.OutputAreaWriter;
 import me.khudyakov.staticanalyzer.entity.syntaxtree.expression.Expression;
 
 import java.util.Collections;
@@ -12,12 +11,6 @@ public class ExpressionStatement extends Statement {
 
     public ExpressionStatement(Expression expression) {
         this.expression = expression;
-    }
-
-    @Override
-    public void execute() {
-        int value = expression.execute();
-        OutputAreaWriter.println(String.valueOf(value));
     }
 
     @Override

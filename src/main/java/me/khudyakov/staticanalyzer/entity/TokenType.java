@@ -2,37 +2,26 @@ package me.khudyakov.staticanalyzer.entity;
 
 public enum TokenType {
     // keywords
-    IF("IF"),
-    ASSIGN_IDENTIFIER("ASSIGN_IDENTIFIER"), // @
-    ASSIGN("ASSIGN"), // =
+    IF,
+    ASSIGN_IDENTIFIER, // @
+    ASSIGN, // =
 
     // delimiters
-    OPEN_PARENTHESIS("OPEN_PARENTHESIS"),
-    CLOSE_PARENTHESIS("CLOSE_PARENTHESIS"),
-    OPEN_BRACE("OPEN_BRACE"),
-    CLOSE_BRACE("CLOSE_BRACE"),
-    SEMICOLON("SEMICOLON"),
+    OPEN_PARENTHESIS,
+    CLOSE_PARENTHESIS,
+    OPEN_BRACE,
+    CLOSE_BRACE,
+    SEMICOLON,
 
     // expression operations
-    LESS("LESS"),
-    GREATER("GREATER"),
-    ADDITION("ADDITION"),
-    SUBTRACTION("SUBTRACTION"),
-    MULTIPLICATION("MULTIPLICATION"),
-    DIVISION("DIVISION"),
+    LESS,
+    GREATER,
+    ADDITION,
+    SUBTRACTION,
+    MULTIPLICATION,
+    DIVISION,
 
     // atoms
-    INTEGER("INTEGER"),
-    IDENTIFIER("IDENTIFIER");
-
-
-    private final String value;
-
-    TokenType(String value) {
-        this.value = value;
-    }
-
-    public String getValue() {
-        return value;
-    }
+    INTEGER,
+    IDENTIFIER
 }

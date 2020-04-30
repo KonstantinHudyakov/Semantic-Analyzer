@@ -6,8 +6,8 @@ import java.util.Objects;
 
 public class Variable extends Expression {
 
-    public final String name;
-    public Integer value;
+    private final String name;
+    private Integer value;
 
     public Variable(String name) {
         this.name = name;
